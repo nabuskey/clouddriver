@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.spinnaker.cats.cache.Cache;
 import com.netflix.spinnaker.cats.cache.CacheData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -30,7 +31,7 @@ public class ScalableTargetCacheClient extends AbstractCacheClient<ScalableTarge
   private final ObjectMapper objectMapper;
 
   @Autowired
-  public ScalableTargetCacheClient(Cache cacheView, ObjectMapper objectMapper) {
+  public ScalableTargetCacheClient(@Lazy Cache cacheView, ObjectMapper objectMapper) {
     super(cacheView, SCALABLE_TARGETS.toString());
     this.objectMapper = objectMapper;
   }

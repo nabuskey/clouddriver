@@ -16,6 +16,7 @@
 
 package com.netflix.spinnaker.clouddriver.aws.security.config;
 
+import com.netflix.spinnaker.credentials.definition.CredentialsDefinition;
 import com.netflix.spinnaker.fiat.model.resources.Permissions;
 import java.util.List;
 
@@ -130,7 +131,7 @@ public class CredentialsConfig {
     }
   }
 
-  public static class Account {
+  public static class Account implements CredentialsDefinition {
     private String name;
     private String environment;
     private String accountType;

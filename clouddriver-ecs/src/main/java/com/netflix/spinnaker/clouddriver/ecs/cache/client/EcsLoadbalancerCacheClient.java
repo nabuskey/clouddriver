@@ -28,6 +28,7 @@ import com.netflix.spinnaker.clouddriver.ecs.cache.model.EcsLoadBalancerCache;
 import com.netflix.spinnaker.clouddriver.ecs.provider.view.EcsAccountMapper;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -38,7 +39,7 @@ public class EcsLoadbalancerCacheClient {
   private final EcsAccountMapper ecsAccountMapper;
 
   public EcsLoadbalancerCacheClient(
-      Cache cacheView, ObjectMapper objectMapper, EcsAccountMapper ecsAccountMapper) {
+      @Lazy Cache cacheView, ObjectMapper objectMapper, EcsAccountMapper ecsAccountMapper) {
     this.cacheView = cacheView;
     this.objectMapper = objectMapper;
     this.ecsAccountMapper = ecsAccountMapper;

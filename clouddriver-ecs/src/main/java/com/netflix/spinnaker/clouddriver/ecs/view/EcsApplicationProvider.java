@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -42,7 +43,7 @@ public class EcsApplicationProvider implements ApplicationProvider {
   @Autowired
   public EcsApplicationProvider(
       AccountCredentialsProvider accountCredentialsProvider,
-      ServiceCacheClient serviceCacheClient) {
+      @Lazy ServiceCacheClient serviceCacheClient) {
     this.accountCredentialsProvider = accountCredentialsProvider;
     this.serviceCacheClient = serviceCacheClient;
   }

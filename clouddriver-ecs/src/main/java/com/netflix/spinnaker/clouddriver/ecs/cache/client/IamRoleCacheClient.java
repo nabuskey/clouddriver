@@ -29,13 +29,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
 public class IamRoleCacheClient extends AbstractCacheClient<IamRole> {
 
   @Autowired
-  public IamRoleCacheClient(Cache cacheView) {
+  public IamRoleCacheClient(@Lazy Cache cacheView) {
     super(cacheView, IAM_ROLE.toString());
   }
 

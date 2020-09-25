@@ -23,13 +23,14 @@ import com.netflix.spinnaker.cats.cache.CacheData;
 import com.netflix.spinnaker.clouddriver.ecs.cache.model.EcsCluster;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
 public class EcsClusterCacheClient extends AbstractCacheClient<EcsCluster> {
 
   @Autowired
-  public EcsClusterCacheClient(Cache cacheView) {
+  public EcsClusterCacheClient(@Lazy Cache cacheView) {
     super(cacheView, ECS_CLUSTERS.toString());
   }
 

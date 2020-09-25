@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -40,7 +41,7 @@ public class EcsTargetGroupCacheClient {
   private final Cache cacheView;
   private final ObjectMapper objectMapper;
 
-  public EcsTargetGroupCacheClient(Cache cacheView, ObjectMapper objectMapper) {
+  public EcsTargetGroupCacheClient(@Lazy Cache cacheView, ObjectMapper objectMapper) {
     this.cacheView = cacheView;
     this.objectMapper = objectMapper;
   }

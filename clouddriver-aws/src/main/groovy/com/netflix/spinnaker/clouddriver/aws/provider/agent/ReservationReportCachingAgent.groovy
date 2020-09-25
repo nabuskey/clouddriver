@@ -50,6 +50,7 @@ import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
 import com.netflix.spinnaker.clouddriver.cache.CustomScheduledAgent
+import com.netflix.spinnaker.credentials.CredentialsRepository
 import groovy.util.logging.Slf4j
 import org.springframework.context.ApplicationContext
 
@@ -79,7 +80,7 @@ class ReservationReportCachingAgent implements CachingAgent, CustomScheduledAgen
 
   final AmazonClientProvider amazonClientProvider
   final AmazonS3DataProvider amazonS3DataProvider
-  final Collection<NetflixAmazonCredentials> accounts
+  final CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository;
   final ObjectMapper objectMapper
   final AccountReservationDetailSerializer accountReservationDetailSerializer
   final Set<String> vpcOnlyAccounts
@@ -90,13 +91,13 @@ class ReservationReportCachingAgent implements CachingAgent, CustomScheduledAgen
   ReservationReportCachingAgent(Registry registry,
                                 AmazonClientProvider amazonClientProvider,
                                 AmazonS3DataProvider amazonS3DataProvider,
-                                Collection<NetflixAmazonCredentials> accounts,
+                                CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
                                 ObjectMapper objectMapper,
                                 ExecutorService reservationReportPool,
                                 ApplicationContext ctx) {
     this.amazonClientProvider = amazonClientProvider
     this.amazonS3DataProvider = amazonS3DataProvider
-    this.accounts = accounts
+    this.accountCredentialsRepository = accountCredentialsRepository
 
     def module = new SimpleModule()
     accountReservationDetailSerializer = new AccountReservationDetailSerializer()
@@ -173,7 +174,7 @@ class ReservationReportCachingAgent implements CachingAgent, CustomScheduledAgen
   }
 
   public Collection<NetflixAmazonCredentials> getAccounts() {
-    return accounts;
+    return accountCredentialsRepository.getAll();
   }
 
   @Override

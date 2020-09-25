@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,7 +35,7 @@ public class TargetHealthCacheClient extends AbstractCacheClient<EcsTargetHealth
   private ObjectMapper objectMapper;
 
   @Autowired
-  public TargetHealthCacheClient(Cache cacheView, ObjectMapper objectMapper) {
+  public TargetHealthCacheClient(@Lazy Cache cacheView, ObjectMapper objectMapper) {
     super(cacheView, TARGET_HEALTHS.toString());
     this.objectMapper = objectMapper;
   }

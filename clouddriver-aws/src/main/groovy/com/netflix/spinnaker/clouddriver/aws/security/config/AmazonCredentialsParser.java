@@ -1,17 +1,18 @@
 /*
- * Copyright 2015 Netflix, Inc.
+ * Copyright 2020 Netflix, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package com.netflix.spinnaker.clouddriver.aws.security.config;
@@ -20,12 +21,10 @@ import com.amazonaws.SDKGlobalConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netflix.spinnaker.clouddriver.aws.security.AWSAccountInfoLookup;
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials;
-import com.netflix.spinnaker.clouddriver.aws.security.DefaultAWSAccountInfoLookup;
+import com.netflix.spinnaker.clouddriver.aws.security.*;
 import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsConfig.Account;
 import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsConfig.Region;
+import com.netflix.spinnaker.credentials.definition.CredentialsParser;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -34,59 +33,31 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class CredentialsLoader<T extends AmazonCredentials> {
+public class AmazonCredentialsParser<U extends Account, V extends NetflixAmazonCredentials>
+    implements CredentialsParser<U, V> {
 
   private final AWSCredentialsProvider credentialsProvider;
   private final AWSAccountInfoLookup awsAccountInfoLookup;
   private final Map<String, String> templateValues;
-  private final CredentialTranslator<T> credentialTranslator;
+  private final CredentialTranslator<V> credentialTranslator;
   private final ObjectMapper objectMapper;
+  private final CredentialsConfig credentialsConfig;
 
-  public CredentialsLoader(
+  public AmazonCredentialsParser(
       AWSCredentialsProvider credentialsProvider,
       AmazonClientProvider amazonClientProvider,
-      Class<T> credentialsType) {
-    this(
-        credentialsProvider,
-        amazonClientProvider,
-        credentialsType,
-        Collections.<String, String>emptyMap());
-  }
-
-  public CredentialsLoader(
-      AWSCredentialsProvider credentialsProvider,
-      AmazonClientProvider amazonClientProvider,
-      Class<T> credentialsType,
-      Map<String, String> templateValues) {
-    this(
-        credentialsProvider,
-        new DefaultAWSAccountInfoLookup(credentialsProvider, amazonClientProvider),
-        credentialsType,
-        templateValues);
-  }
-
-  public CredentialsLoader(
-      AWSCredentialsProvider credentialsProvider,
-      AWSAccountInfoLookup awsAccountInfoLookup,
-      Class<T> credentialsType) {
-    this(
-        credentialsProvider,
-        awsAccountInfoLookup,
-        credentialsType,
-        Collections.<String, String>emptyMap());
-  }
-
-  public CredentialsLoader(
-      AWSCredentialsProvider credentialsProvider,
-      AWSAccountInfoLookup awsAccountInfoLookup,
-      Class<T> credentialsType,
-      Map<String, String> templateValues) {
+      Class<V> credentialsType,
+      CredentialsConfig credentialsConfig) {
     this.credentialsProvider = Objects.requireNonNull(credentialsProvider, "credentialsProvider");
-    this.awsAccountInfoLookup = awsAccountInfoLookup;
-    this.templateValues = templateValues;
+    this.awsAccountInfoLookup =
+        new DefaultAWSAccountInfoLookup(credentialsProvider, amazonClientProvider);
+    this.templateValues = Collections.emptyMap();
     this.objectMapper = new ObjectMapper();
     this.credentialTranslator = findTranslator(credentialsType, this.objectMapper);
+    this.credentialsConfig = credentialsConfig;
   }
 
   private Lazy<List<Region>> createDefaults(final List<Region> defaults) {
@@ -142,7 +113,9 @@ public class CredentialsLoader<T extends AmazonCredentials> {
     }
 
     for (Iterator<String> lookups = toLookup.iterator(); lookups.hasNext(); ) {
-      Region fromDefault = find(defaults.get(), lookups.next());
+      List<Region> r = defaults.get();
+      String a = lookups.next();
+      Region fromDefault = find(r, a);
       if (fromDefault != null) {
         lookups.remove();
         result.add(fromDefault);
@@ -200,19 +173,19 @@ public class CredentialsLoader<T extends AmazonCredentials> {
     return result;
   }
 
-  public T load(String accountName) throws Throwable {
+  public V load(String accountName) throws Throwable {
     CredentialsConfig config = new CredentialsConfig();
     Account account = new Account();
     account.setName(accountName);
     config.setAccounts(Arrays.asList(account));
-    List<T> result = load(config);
+    List<V> result = load(config);
     if (result.size() != 1) {
       throw new IllegalStateException("failed to create account");
     }
     return result.get(0);
   }
 
-  public List<T> load(CredentialsConfig source) throws Throwable {
+  public List<V> load(CredentialsConfig source) throws Throwable {
     final CredentialsConfig config = objectMapper.convertValue(source, CredentialsConfig.class);
 
     if (config.getAccounts() == null || config.getAccounts().isEmpty()) {
@@ -227,84 +200,101 @@ public class CredentialsLoader<T extends AmazonCredentials> {
       System.setProperty(
           SDKGlobalConfiguration.SECRET_KEY_SYSTEM_PROPERTY, config.getSecretAccessKey());
     }
-    Lazy<List<Region>> defaultRegions = createDefaults(config.getDefaultRegions());
-    List<T> initializedAccounts = new ArrayList<>(config.getAccounts().size());
+    List<V> initializedAccounts = new ArrayList<>(config.getAccounts().size());
     for (Account account : config.getAccounts()) {
-      if (account.getAccountId() == null) {
-        if (!credentialTranslator.resolveAccountId()) {
-          throw new IllegalArgumentException(
-              "accountId is required and not resolvable for this credentials type");
-        }
-        account.setAccountId(awsAccountInfoLookup.findAccountId());
-      }
-
-      if (account.getEnvironment() == null) {
-        account.setEnvironment(account.getName());
-      }
-
-      if (account.getAccountType() == null) {
-        account.setAccountType(account.getName());
-      }
-
-      account.setRegions(initRegions(defaultRegions, account.getRegions()));
-      account.setDefaultSecurityGroups(
-          account.getDefaultSecurityGroups() != null
-              ? account.getDefaultSecurityGroups()
-              : config.getDefaultSecurityGroups());
-      account.setLifecycleHooks(
-          account.getLifecycleHooks() != null
-              ? account.getLifecycleHooks()
-              : config.getDefaultLifecycleHooks());
-      account.setEnabled(Optional.ofNullable(account.getEnabled()).orElse(true));
-
-      Map<String, String> templateContext = new HashMap<>(templateValues);
-      templateContext.put("name", account.getName());
-      templateContext.put("accountId", account.getAccountId());
-      templateContext.put("environment", account.getEnvironment());
-      templateContext.put("accountType", account.getAccountType());
-
-      account.setDefaultKeyPair(
-          templateFirstNonNull(
-              templateContext, account.getDefaultKeyPair(), config.getDefaultKeyPairTemplate()));
-      account.setEdda(
-          templateFirstNonNull(
-              templateContext, account.getEdda(), config.getDefaultEddaTemplate()));
-      account.setFront50(
-          templateFirstNonNull(
-              templateContext, account.getFront50(), config.getDefaultFront50Template()));
-      account.setDiscovery(
-          templateFirstNonNull(
-              templateContext, account.getDiscovery(), config.getDefaultDiscoveryTemplate()));
-      account.setAssumeRole(
-          templateFirstNonNull(
-              templateContext, account.getAssumeRole(), config.getDefaultAssumeRole()));
-      account.setSessionName(
-          templateFirstNonNull(
-              templateContext, account.getSessionName(), config.getDefaultSessionName()));
-      account.setBastionHost(
-          templateFirstNonNull(
-              templateContext, account.getBastionHost(), config.getDefaultBastionHostTemplate()));
-
-      if (account.getLifecycleHooks() != null) {
-        for (CredentialsConfig.LifecycleHook lifecycleHook : account.getLifecycleHooks()) {
-          lifecycleHook.setRoleARN(
-              templateFirstNonNull(
-                  templateContext,
-                  lifecycleHook.getRoleARN(),
-                  config.getDefaultLifecycleHookRoleARNTemplate()));
-          lifecycleHook.setNotificationTargetARN(
-              templateFirstNonNull(
-                  templateContext,
-                  lifecycleHook.getNotificationTargetARN(),
-                  config.getDefaultLifecycleHookNotificationTargetARNTemplate()));
-        }
-      }
-
-      initializedAccounts.add(credentialTranslator.translate(credentialsProvider, account));
+      initializedAccounts.add(parseAccount(config, account));
     }
     return initializedAccounts.stream()
         .filter(AmazonCredentials::isEnabled)
         .collect(Collectors.toList());
+  }
+
+  @Nullable
+  @Override
+  public V parse(@NotNull U account) {
+    try {
+      V a = parseAccount(credentialsConfig, account);
+      if (a.isEnabled()) {
+        return a;
+      }
+    } catch (Throwable t) {
+      //      t.printStackTrace();
+      return null;
+    }
+    return null;
+  }
+
+  private V parseAccount(CredentialsConfig config, Account account) throws Throwable {
+    Lazy<List<Region>> defaultRegions = createDefaults(config.getDefaultRegions());
+    if (account.getAccountId() == null) {
+      if (!credentialTranslator.resolveAccountId()) {
+        throw new IllegalArgumentException(
+            "accountId is required and not resolvable for this credentials type");
+      }
+      account.setAccountId(awsAccountInfoLookup.findAccountId());
+    }
+
+    if (account.getEnvironment() == null) {
+      account.setEnvironment(account.getName());
+    }
+
+    if (account.getAccountType() == null) {
+      account.setAccountType(account.getName());
+    }
+
+    account.setRegions(initRegions(defaultRegions, account.getRegions()));
+    account.setDefaultSecurityGroups(
+        account.getDefaultSecurityGroups() != null
+            ? account.getDefaultSecurityGroups()
+            : config.getDefaultSecurityGroups());
+    account.setLifecycleHooks(
+        account.getLifecycleHooks() != null
+            ? account.getLifecycleHooks()
+            : config.getDefaultLifecycleHooks());
+    account.setEnabled(Optional.ofNullable(account.getEnabled()).orElse(true));
+
+    Map<String, String> templateContext = new HashMap<>(templateValues);
+    templateContext.put("name", account.getName());
+    templateContext.put("accountId", account.getAccountId());
+    templateContext.put("environment", account.getEnvironment());
+    templateContext.put("accountType", account.getAccountType());
+
+    account.setDefaultKeyPair(
+        templateFirstNonNull(
+            templateContext, account.getDefaultKeyPair(), config.getDefaultKeyPairTemplate()));
+    account.setEdda(
+        templateFirstNonNull(templateContext, account.getEdda(), config.getDefaultEddaTemplate()));
+    account.setFront50(
+        templateFirstNonNull(
+            templateContext, account.getFront50(), config.getDefaultFront50Template()));
+    account.setDiscovery(
+        templateFirstNonNull(
+            templateContext, account.getDiscovery(), config.getDefaultDiscoveryTemplate()));
+    account.setAssumeRole(
+        templateFirstNonNull(
+            templateContext, account.getAssumeRole(), config.getDefaultAssumeRole()));
+    account.setSessionName(
+        templateFirstNonNull(
+            templateContext, account.getSessionName(), config.getDefaultSessionName()));
+    account.setBastionHost(
+        templateFirstNonNull(
+            templateContext, account.getBastionHost(), config.getDefaultBastionHostTemplate()));
+
+    if (account.getLifecycleHooks() != null) {
+      for (CredentialsConfig.LifecycleHook lifecycleHook : account.getLifecycleHooks()) {
+        lifecycleHook.setRoleARN(
+            templateFirstNonNull(
+                templateContext,
+                lifecycleHook.getRoleARN(),
+                config.getDefaultLifecycleHookRoleARNTemplate()));
+        lifecycleHook.setNotificationTargetARN(
+            templateFirstNonNull(
+                templateContext,
+                lifecycleHook.getNotificationTargetARN(),
+                config.getDefaultLifecycleHookNotificationTargetARNTemplate()));
+      }
+    }
+    return credentialTranslator.translate(credentialsProvider, account);
   }
 
   private static class Lazy<T> {

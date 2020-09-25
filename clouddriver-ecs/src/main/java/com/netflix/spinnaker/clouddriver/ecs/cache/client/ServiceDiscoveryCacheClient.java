@@ -22,13 +22,14 @@ import com.netflix.spinnaker.cats.cache.CacheData;
 import com.netflix.spinnaker.clouddriver.ecs.cache.model.ServiceDiscoveryRegistry;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ServiceDiscoveryCacheClient extends AbstractCacheClient<ServiceDiscoveryRegistry> {
 
   @Autowired
-  public ServiceDiscoveryCacheClient(Cache cacheView) {
+  public ServiceDiscoveryCacheClient(@Lazy Cache cacheView) {
     super(cacheView, SERVICE_DISCOVERY_REGISTRIES.toString());
   }
 

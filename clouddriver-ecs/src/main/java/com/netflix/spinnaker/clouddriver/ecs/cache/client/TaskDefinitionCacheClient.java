@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,7 +36,7 @@ public class TaskDefinitionCacheClient extends AbstractCacheClient<TaskDefinitio
   private ObjectMapper objectMapper;
 
   @Autowired
-  public TaskDefinitionCacheClient(Cache cacheView, ObjectMapper objectMapper) {
+  public TaskDefinitionCacheClient(@Lazy Cache cacheView, ObjectMapper objectMapper) {
     super(cacheView, TASK_DEFINITIONS.toString());
     this.objectMapper = objectMapper;
   }

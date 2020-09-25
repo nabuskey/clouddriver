@@ -24,27 +24,28 @@ import com.netflix.spinnaker.clouddriver.aws.provider.AwsProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
+import com.netflix.spinnaker.credentials.CredentialsRepository;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
 public class LambdaAgentProvider implements AgentProvider {
   private final ObjectMapper objectMapper;
-
-  private final AccountCredentialsProvider accountCredentialsProvider;
+  private final CredentialsRepository<? extends NetflixAmazonCredentials> credentialsRepository;
   private final AmazonClientProvider amazonClientProvider;
 
   @Autowired
   public LambdaAgentProvider(
-      AccountCredentialsProvider accountCredentialsProvider,
+      @Lazy CredentialsRepository<? extends NetflixAmazonCredentials> credentialsRepository,
       AmazonClientProvider amazonClientProvider) {
     this.objectMapper = AmazonObjectMapperConfigurer.createConfigured();
 
-    this.accountCredentialsProvider = accountCredentialsProvider;
+    this.credentialsRepository = credentialsRepository;
     this.amazonClientProvider = amazonClientProvider;
   }
 
@@ -57,8 +58,8 @@ public class LambdaAgentProvider implements AgentProvider {
   public Collection<Agent> agents() {
     List<Agent> agents = new ArrayList<>();
 
-    accountCredentialsProvider.getAll().stream()
-        .filter(c -> c instanceof NetflixAmazonCredentials)
+    credentialsRepository.getAll().stream()
+        .filter(Objects::nonNull)
         .map(c -> (NetflixAmazonCredentials) c)
         .filter(NetflixAmazonCredentials::getLambdaEnabled)
         .forEach(

@@ -25,6 +25,7 @@ import com.netflix.spinnaker.clouddriver.aws.data.Keys;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,7 +34,7 @@ public class EcsInstanceCacheClient {
   private final Cache cacheView;
   private final ObjectMapper objectMapper;
 
-  public EcsInstanceCacheClient(Cache cacheView, ObjectMapper objectMapper) {
+  public EcsInstanceCacheClient(@Lazy Cache cacheView, ObjectMapper objectMapper) {
     this.cacheView = cacheView;
     this.objectMapper = objectMapper;
   }

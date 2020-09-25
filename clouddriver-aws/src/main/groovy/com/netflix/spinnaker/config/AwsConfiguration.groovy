@@ -50,6 +50,7 @@ import com.netflix.spinnaker.clouddriver.event.SpinnakerEvent
 import com.netflix.spinnaker.clouddriver.saga.config.SagaAutoConfiguration
 import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository
 import com.netflix.spinnaker.clouddriver.security.ProviderUtils
+import com.netflix.spinnaker.credentials.CredentialsRepository
 import com.netflix.spinnaker.kork.aws.AwsComponents
 import com.netflix.spinnaker.kork.aws.bastion.BastionConfig
 import com.netflix.spinnaker.kork.dynamicconfig.DynamicConfigService
@@ -184,9 +185,9 @@ class AwsConfiguration {
   }
 
   @Bean
-  @DependsOn('netflixAmazonCredentials')
+  @DependsOn('amazonCredentialsLoader')
   BasicAmazonDeployHandler basicAmazonDeployHandler(RegionScopedProviderFactory regionScopedProviderFactory,
-                                                    AccountCredentialsRepository accountCredentialsRepository,
+                                                    CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
                                                     DeployDefaults deployDefaults,
                                                     ScalingPolicyCopier scalingPolicyCopier,
                                                     BlockDeviceConfig blockDeviceConfig,
@@ -210,54 +211,19 @@ class AwsConfiguration {
   }
 
   @Bean
-  @DependsOn('netflixAmazonCredentials')
+  @DependsOn('amazonCredentialsLoader')
   AwsCleanupProvider awsOperationProvider(AwsConfigurationProperties awsConfigurationProperties,
                                           AmazonClientProvider amazonClientProvider,
                                           AccountCredentialsRepository accountCredentialsRepository,
                                           DeployDefaults deployDefaults) {
-    def awsCleanupProvider = new AwsCleanupProvider(Collections.newSetFromMap(new ConcurrentHashMap<Agent, Boolean>()))
-
-    synchronizeAwsCleanupProvider(awsConfigurationProperties, awsCleanupProvider, amazonClientProvider, accountCredentialsRepository, deployDefaults)
-
-    awsCleanupProvider
+    return new AwsCleanupProvider(Collections.newSetFromMap(new ConcurrentHashMap<Agent, Boolean>()))
   }
 
   @Bean
-  @DependsOn('netflixAmazonCredentials')
+  @DependsOn('amazonCredentialsLoader')
   SecurityGroupLookupFactory securityGroupLookup(AmazonClientProvider amazonClientProvider,
-                                          AccountCredentialsRepository accountCredentialsRepository) {
+                                                 CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository) {
     new SecurityGroupLookupFactory(amazonClientProvider, accountCredentialsRepository)
-  }
-
-  private static void synchronizeAwsCleanupProvider(AwsConfigurationProperties awsConfigurationProperties,
-                                                    AwsCleanupProvider awsCleanupProvider,
-                                                    AmazonClientProvider amazonClientProvider,
-                                                    AccountCredentialsRepository accountCredentialsRepository,
-                                                    DeployDefaults deployDefaults) {
-    def scheduledAccounts = ProviderUtils.getScheduledAccounts(awsCleanupProvider)
-    Set<NetflixAmazonCredentials> allAccounts = ProviderUtils.buildThreadSafeSetOfAccounts(accountCredentialsRepository, NetflixAmazonCredentials, AmazonCloudProvider.ID)
-
-    List<Agent> newlyAddedAgents = []
-
-    allAccounts.each { account ->
-      if (!scheduledAccounts.contains(account)) {
-        account.regions.each { region ->
-          if (deployDefaults.isReconcileClassicLinkAccount(account)) {
-            newlyAddedAgents << new ReconcileClassicLinkSecurityGroupsAgent(
-              amazonClientProvider, account, region.name, deployDefaults
-            )
-          }
-        }
-      }
-    }
-
-    if (!awsCleanupProvider.agentScheduler) {
-      if (awsConfigurationProperties.cleanup.alarms.enabled) {
-        awsCleanupProvider.agents.add(new CleanupAlarmsAgent(amazonClientProvider, accountCredentialsRepository, awsConfigurationProperties.cleanup.alarms.daysToKeep))
-      }
-      awsCleanupProvider.agents.add(new CleanupDetachedInstancesAgent(amazonClientProvider, accountCredentialsRepository))
-    }
-    awsCleanupProvider.agents.addAll(newlyAddedAgents)
   }
 
   @Bean

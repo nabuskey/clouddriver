@@ -30,9 +30,11 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
+@Lazy
 public class EcsInstanceProvider implements InstanceProvider<EcsTask, String> {
 
   private final TaskCacheClient taskCacheClient;

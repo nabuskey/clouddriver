@@ -23,13 +23,14 @@ import com.netflix.spinnaker.cats.cache.CacheData;
 import com.netflix.spinnaker.clouddriver.ecs.cache.model.ContainerInstance;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ContainerInstanceCacheClient extends AbstractCacheClient<ContainerInstance> {
 
   @Autowired
-  public ContainerInstanceCacheClient(Cache cacheView) {
+  public ContainerInstanceCacheClient(@Lazy Cache cacheView) {
     super(cacheView, CONTAINER_INSTANCES.toString());
   }
 

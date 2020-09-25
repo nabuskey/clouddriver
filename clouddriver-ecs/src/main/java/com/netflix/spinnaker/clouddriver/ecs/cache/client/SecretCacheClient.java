@@ -22,13 +22,14 @@ import com.netflix.spinnaker.cats.cache.CacheData;
 import com.netflix.spinnaker.clouddriver.ecs.cache.model.Secret;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SecretCacheClient extends AbstractCacheClient<Secret> {
 
   @Autowired
-  public SecretCacheClient(Cache cacheView) {
+  public SecretCacheClient(@Lazy Cache cacheView) {
     super(cacheView, SECRETS.toString());
   }
 

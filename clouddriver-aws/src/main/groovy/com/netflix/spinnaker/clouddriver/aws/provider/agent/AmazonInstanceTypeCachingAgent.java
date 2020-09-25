@@ -32,8 +32,9 @@ import com.netflix.spinnaker.cats.provider.ProviderCache;
 import com.netflix.spinnaker.clouddriver.aws.cache.Keys;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsInfrastructureProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials;
+import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository;
+import com.netflix.spinnaker.credentials.CredentialsRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -45,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -65,7 +67,8 @@ public class AmazonInstanceTypeCachingAgent implements CachingAgent {
 
   // https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-west-2/index.json
   private final String region;
-  private final AccountCredentialsRepository accountCredentialsRepository;
+  private final CredentialsRepository<? extends NetflixAmazonCredentials>
+      accountCredentialsRepository;
   private final URI pricingUri;
   private final HttpHost pricingHost;
   private final HttpClient httpClient;
@@ -73,14 +76,15 @@ public class AmazonInstanceTypeCachingAgent implements CachingAgent {
       new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
   public AmazonInstanceTypeCachingAgent(
-      String region, AccountCredentialsRepository accountCredentialsRepository) {
+      String region,
+      CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository) {
     this(region, accountCredentialsRepository, HttpClients.createDefault());
   }
 
   // VisibleForTesting
   AmazonInstanceTypeCachingAgent(
       String region,
-      AccountCredentialsRepository accountCredentialsRepository,
+      CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
       HttpClient httpClient) {
     this.region = region;
     this.accountCredentialsRepository = accountCredentialsRepository;
@@ -102,7 +106,7 @@ public class AmazonInstanceTypeCachingAgent implements CachingAgent {
     try {
       Set<String> matchingAccounts =
           accountCredentialsRepository.getAll().stream()
-              .filter(AmazonCredentials.class::isInstance)
+              .filter(Objects::nonNull)
               .map(AmazonCredentials.class::cast)
               .filter(ac -> ac.getRegions().stream().anyMatch(r -> region.equals(r.getName())))
               .map(AccountCredentials::getName)

@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -35,7 +36,7 @@ public class ServiceCacheClient extends AbstractCacheClient<Service> {
   private ObjectMapper objectMapper;
 
   @Autowired
-  public ServiceCacheClient(Cache cacheView, ObjectMapper objectMapper) {
+  public ServiceCacheClient(@Lazy Cache cacheView, ObjectMapper objectMapper) {
     super(cacheView, SERVICES.toString());
     this.objectMapper = objectMapper;
   }

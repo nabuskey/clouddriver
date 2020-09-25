@@ -46,7 +46,7 @@ import com.netflix.spinnaker.clouddriver.deploy.DeployDescription
 import com.netflix.spinnaker.clouddriver.deploy.DeployHandler
 import com.netflix.spinnaker.clouddriver.deploy.DeploymentResult
 import com.netflix.spinnaker.clouddriver.orchestration.events.CreateServerGroupEvent
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository
+import com.netflix.spinnaker.credentials.CredentialsRepository
 import com.netflix.spinnaker.kork.dynamicconfig.DynamicConfigService
 import groovy.transform.PackageScope
 import groovy.util.logging.Slf4j
@@ -74,7 +74,7 @@ class BasicAmazonDeployHandler implements DeployHandler<BasicAmazonDeployDescrip
   }
 
   private final RegionScopedProviderFactory regionScopedProviderFactory
-  private final AccountCredentialsRepository accountCredentialsRepository
+  private final CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository
   private final AwsConfiguration.AmazonServerGroupProvider amazonServerGroupProvider
   private final AwsConfiguration.DeployDefaults deployDefaults
   private final ScalingPolicyCopier scalingPolicyCopier
@@ -84,7 +84,7 @@ class BasicAmazonDeployHandler implements DeployHandler<BasicAmazonDeployDescrip
   private List<CreateServerGroupEvent> deployEvents = []
 
   BasicAmazonDeployHandler(RegionScopedProviderFactory regionScopedProviderFactory,
-                           AccountCredentialsRepository accountCredentialsRepository,
+                           CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
                            AwsConfiguration.AmazonServerGroupProvider amazonServerGroupProvider,
                            AwsConfiguration.DeployDefaults deployDefaults,
                            ScalingPolicyCopier scalingPolicyCopier,
