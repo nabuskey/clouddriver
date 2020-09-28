@@ -26,7 +26,6 @@ import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider
 import com.netflix.spinnaker.clouddriver.aws.AwsConfigurationProperties
 import com.netflix.spinnaker.clouddriver.aws.agent.CleanupAlarmsAgent
 import com.netflix.spinnaker.clouddriver.aws.agent.CleanupDetachedInstancesAgent
-import com.netflix.spinnaker.clouddriver.aws.agent.ReconcileClassicLinkSecurityGroupsAgent
 import com.netflix.spinnaker.clouddriver.aws.deploy.BlockDeviceConfig
 import com.netflix.spinnaker.clouddriver.aws.deploy.handlers.BasicAmazonDeployHandler
 import com.netflix.spinnaker.clouddriver.aws.deploy.ops.securitygroup.SecurityGroupLookupFactory
@@ -40,6 +39,7 @@ import com.netflix.spinnaker.clouddriver.aws.event.DefaultAfterResizeEventHandle
 import com.netflix.spinnaker.clouddriver.aws.model.AmazonBlockDevice
 import com.netflix.spinnaker.clouddriver.aws.model.AmazonServerGroup
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsCleanupProvider
+import com.netflix.spinnaker.clouddriver.aws.provider.config.ProviderHelpers
 import com.netflix.spinnaker.clouddriver.aws.provider.view.AmazonClusterProvider
 import com.netflix.spinnaker.clouddriver.aws.security.*
 import com.netflix.spinnaker.clouddriver.aws.security.EddaTimeoutConfig.Builder
@@ -234,21 +234,14 @@ class AwsConfiguration {
                                                     AmazonClientProvider amazonClientProvider,
                                                     AccountCredentialsRepository accountCredentialsRepository,
                                                     DeployDefaults deployDefaults) {
-    def scheduledAccounts = ProviderUtils.getScheduledAccounts(awsCleanupProvider)
     Set<NetflixAmazonCredentials> allAccounts = ProviderUtils.buildThreadSafeSetOfAccounts(accountCredentialsRepository, NetflixAmazonCredentials, AmazonCloudProvider.ID)
 
     List<Agent> newlyAddedAgents = []
 
     allAccounts.each { account ->
-      if (!scheduledAccounts.contains(account)) {
-        account.regions.each { region ->
-          if (deployDefaults.isReconcileClassicLinkAccount(account)) {
-            newlyAddedAgents << new ReconcileClassicLinkSecurityGroupsAgent(
-              amazonClientProvider, account, region.name, deployDefaults
-            )
-          }
-        }
-      }
+      List<Agent> result = ProviderHelpers.buildAwsCleanupAgents(account, accountCredentialsRepository, amazonClientProvider, awsCleanupProvider,
+        deployDefaults, awsConfigurationProperties)
+      newlyAddedAgents.addAll(result)
     }
 
     if (!awsCleanupProvider.agentScheduler) {
