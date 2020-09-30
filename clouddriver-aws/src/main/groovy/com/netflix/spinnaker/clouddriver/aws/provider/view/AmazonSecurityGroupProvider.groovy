@@ -27,13 +27,14 @@ import com.netflix.spinnaker.cats.cache.RelationshipCacheFilter
 import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider
 import com.netflix.spinnaker.clouddriver.aws.cache.Keys
 import com.netflix.spinnaker.clouddriver.aws.model.AmazonSecurityGroup
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials
+import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
 import com.netflix.spinnaker.clouddriver.model.AddressableRange
 import com.netflix.spinnaker.clouddriver.model.SecurityGroupProvider
 import com.netflix.spinnaker.clouddriver.model.securitygroups.IpRangeRule
 import com.netflix.spinnaker.clouddriver.model.securitygroups.Rule
 import com.netflix.spinnaker.clouddriver.model.securitygroups.SecurityGroupRule
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider
 import groovy.transform.Canonical
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
@@ -45,13 +46,13 @@ import static com.netflix.spinnaker.clouddriver.aws.cache.Keys.Namespace.SECURIT
 class AmazonSecurityGroupProvider implements SecurityGroupProvider<AmazonSecurityGroup> {
 
   final String cloudProvider = AmazonCloudProvider.ID
-  final AccountCredentialsProvider accountCredentialsProvider
+  final AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider
   final Cache cacheView
   final ObjectMapper objectMapper
   final Set<AmazonCredentials> accounts
 
   @Autowired
-  AmazonSecurityGroupProvider(AccountCredentialsProvider accountCredentialsProvider,
+  AmazonSecurityGroupProvider(AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
                               Cache cacheView,
                               @Qualifier("amazonObjectMapper") ObjectMapper objectMapper) {
     this.accountCredentialsProvider = accountCredentialsProvider

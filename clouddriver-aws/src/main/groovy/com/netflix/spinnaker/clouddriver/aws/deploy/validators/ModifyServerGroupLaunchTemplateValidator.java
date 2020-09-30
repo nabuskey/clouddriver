@@ -20,11 +20,12 @@ package com.netflix.spinnaker.clouddriver.aws.deploy.validators;
 import com.netflix.spinnaker.clouddriver.aws.AmazonOperation;
 import com.netflix.spinnaker.clouddriver.aws.deploy.description.ModifyServerGroupLaunchTemplateDescription;
 import com.netflix.spinnaker.clouddriver.aws.model.AmazonBlockDevice;
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials;
+import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.deploy.ValidationErrors;
 import com.netflix.spinnaker.clouddriver.orchestration.AtomicOperations;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,11 +34,11 @@ import org.springframework.stereotype.Component;
 @Component("modifyServerGroupLaunchTemplateDescriptionValidator")
 public class ModifyServerGroupLaunchTemplateValidator
     extends AmazonDescriptionValidationSupport<ModifyServerGroupLaunchTemplateDescription> {
-  private final AccountCredentialsProvider accountCredentialsProvider;
+  private final AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider;
 
   @Autowired
   public ModifyServerGroupLaunchTemplateValidator(
-      AccountCredentialsProvider accountCredentialsProvider) {
+      AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider) {
     this.accountCredentialsProvider = accountCredentialsProvider;
   }
 

@@ -87,7 +87,7 @@ class AmazonCredentialsInitializer {
   @ConditionalOnMissingBean(
     value = NetflixAmazonCredentials.class,
     parameterizedContainer = AmazonCredentialProvider.class)
-  AmazonCredentialProvider<? extends NetflixAmazonCredentials>  amazonCredentialProvider(
+  AmazonCredentialProvider<NetflixAmazonCredentials>  amazonCredentialProvider(
     CredentialsRepository<NetflixAmazonCredentials> amazonCredentialsRepository
   ) {
     return new AmazonCredentialProvider<>(amazonCredentialsRepository)

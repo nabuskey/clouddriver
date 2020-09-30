@@ -17,19 +17,14 @@
 package com.netflix.spinnaker.clouddriver.aws.provider.view
 
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch
-import com.amazonaws.services.cloudwatch.model.Dimension
-import com.amazonaws.services.cloudwatch.model.DimensionFilter
-import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsRequest
-import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsResult
-import com.amazonaws.services.cloudwatch.model.ListMetricsRequest
+import com.amazonaws.services.cloudwatch.model.*
 import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider
-import com.netflix.spinnaker.clouddriver.aws.model.AmazonMetricDatapoint
 import com.netflix.spinnaker.clouddriver.aws.model.AmazonMetricDescriptor
 import com.netflix.spinnaker.clouddriver.aws.model.AmazonMetricStatistics
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
 import com.netflix.spinnaker.clouddriver.model.CloudMetricProvider
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -37,12 +32,12 @@ import org.springframework.stereotype.Component
 class AmazonCloudMetricProvider implements CloudMetricProvider<AmazonMetricDescriptor> {
 
   final AmazonClientProvider amazonClientProvider
-  final AccountCredentialsProvider accountCredentialsProvider
+  final AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider
   final AmazonCloudProvider amazonCloudProvider
 
   @Autowired
   AmazonCloudMetricProvider(AmazonClientProvider amazonClientProvider,
-                            AccountCredentialsProvider accountCredentialsProvider,
+                            AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
                             AmazonCloudProvider amazonCloudProvider) {
     this.amazonClientProvider = amazonClientProvider
     this.accountCredentialsProvider = accountCredentialsProvider

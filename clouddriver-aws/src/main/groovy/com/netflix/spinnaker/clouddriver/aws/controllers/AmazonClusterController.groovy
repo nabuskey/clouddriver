@@ -19,8 +19,8 @@ package com.netflix.spinnaker.clouddriver.aws.controllers
 import com.amazonaws.services.autoscaling.model.Activity
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.*
 class AmazonClusterController {
 
   @Autowired
-  AccountCredentialsProvider accountCredentialsProvider
+  AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider
 
   @Autowired
   AmazonClientProvider amazonClientProvider

@@ -15,7 +15,11 @@
  */
 package com.netflix.spinnaker.clouddriver.aws.lifecycle;
 
-import com.amazonaws.auth.policy.*;
+import com.amazonaws.auth.policy.Condition;
+import com.amazonaws.auth.policy.Policy;
+import com.amazonaws.auth.policy.Principal;
+import com.amazonaws.auth.policy.Resource;
+import com.amazonaws.auth.policy.Statement;
 import com.amazonaws.auth.policy.Statement.Effect;
 import com.amazonaws.auth.policy.actions.SNSActions;
 import com.amazonaws.auth.policy.actions.SQSActions;
@@ -32,15 +36,21 @@ import com.netflix.spectator.api.Id;
 import com.netflix.spectator.api.Registry;
 import com.netflix.spinnaker.clouddriver.aws.deploy.ops.discovery.AwsEurekaSupport;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials.LifecycleHook;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.eureka.api.Eureka;
 import com.netflix.spinnaker.clouddriver.eureka.deploy.ops.AbstractEurekaSupport.DiscoveryStatus;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Provider;
 import org.slf4j.Logger;
@@ -59,7 +69,7 @@ public class InstanceTerminationLifecycleWorker implements Runnable {
 
   ObjectMapper objectMapper;
   AmazonClientProvider amazonClientProvider;
-  AccountCredentialsProvider accountCredentialsProvider;
+  AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider;
   InstanceTerminationConfigurationProperties properties;
   Provider<AwsEurekaSupport> discoverySupport;
   Registry registry;
@@ -72,7 +82,7 @@ public class InstanceTerminationLifecycleWorker implements Runnable {
   public InstanceTerminationLifecycleWorker(
       ObjectMapper objectMapper,
       AmazonClientProvider amazonClientProvider,
-      AccountCredentialsProvider accountCredentialsProvider,
+      AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
       InstanceTerminationConfigurationProperties properties,
       Provider<AwsEurekaSupport> discoverySupport,
       Registry registry) {

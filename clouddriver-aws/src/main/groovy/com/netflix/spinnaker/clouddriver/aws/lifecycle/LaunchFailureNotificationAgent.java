@@ -35,10 +35,10 @@ import com.netflix.spinnaker.cats.agent.RunnableAgent;
 import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.cache.CustomScheduledAgent;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
 import com.netflix.spinnaker.clouddriver.tags.EntityTagger;
 import java.io.IOException;
 import java.util.Collections;
@@ -64,7 +64,7 @@ class LaunchFailureNotificationAgent implements RunnableAgent, CustomScheduledAg
 
   private final ObjectMapper objectMapper;
   private final AmazonClientProvider amazonClientProvider;
-  private final AccountCredentialsProvider accountCredentialsProvider;
+  private final AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider;
   private final LaunchFailureConfigurationProperties properties;
   private final EntityTagger serverGroupTagger;
 
@@ -77,7 +77,7 @@ class LaunchFailureNotificationAgent implements RunnableAgent, CustomScheduledAg
   LaunchFailureNotificationAgent(
       ObjectMapper objectMapper,
       AmazonClientProvider amazonClientProvider,
-      AccountCredentialsProvider accountCredentialsProvider,
+      AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
       LaunchFailureConfigurationProperties properties,
       EntityTagger serverGroupTagger) {
     this.objectMapper = objectMapper;

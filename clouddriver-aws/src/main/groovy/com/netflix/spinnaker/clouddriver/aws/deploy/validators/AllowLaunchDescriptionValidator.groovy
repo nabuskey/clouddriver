@@ -16,17 +16,18 @@
 
 package com.netflix.spinnaker.clouddriver.aws.deploy.validators
 
+import com.netflix.spinnaker.clouddriver.aws.deploy.description.AllowLaunchDescription
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider
+import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
 import com.netflix.spinnaker.clouddriver.deploy.DescriptionValidator
 import com.netflix.spinnaker.clouddriver.deploy.ValidationErrors
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider
-import com.netflix.spinnaker.clouddriver.aws.deploy.description.AllowLaunchDescription
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component("allowLaunchDescriptionValidator")
 class AllowLaunchDescriptionValidator extends DescriptionValidator<AllowLaunchDescription> {
   @Autowired
-  AccountCredentialsProvider accountCredentialsProvider
+  AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider
 
   @Override
   void validate(List priorDescriptions, AllowLaunchDescription description, ValidationErrors errors) {

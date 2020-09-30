@@ -26,10 +26,10 @@ import com.netflix.spinnaker.cats.agent.RunnableAgent;
 import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.cache.CustomScheduledAgent;
 import com.netflix.spinnaker.clouddriver.model.EntityTags;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
 import com.netflix.spinnaker.clouddriver.tags.EntityTagger;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
@@ -47,12 +47,12 @@ public class LaunchFailureNotificationCleanupAgent implements RunnableAgent, Cus
   private static final int MAX_RESULTS = 10000;
 
   private final AmazonClientProvider amazonClientProvider;
-  private final AccountCredentialsProvider accountCredentialsProvider;
+  private final AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider;
   private final EntityTagger serverGroupTagger;
 
   LaunchFailureNotificationCleanupAgent(
       AmazonClientProvider amazonClientProvider,
-      AccountCredentialsProvider accountCredentialsProvider,
+      AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
       EntityTagger serverGroupTagger) {
     this.amazonClientProvider = amazonClientProvider;
     this.accountCredentialsProvider = accountCredentialsProvider;

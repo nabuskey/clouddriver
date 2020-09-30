@@ -17,12 +17,13 @@
 package com.netflix.spinnaker.clouddriver.aws.deploy.validators
 
 import com.netflix.spinnaker.clouddriver.aws.AmazonOperation
+import com.netflix.spinnaker.clouddriver.aws.deploy.description.BasicAmazonDeployDescription
+import com.netflix.spinnaker.clouddriver.aws.model.AmazonBlockDevice
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials
+import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
 import com.netflix.spinnaker.clouddriver.deploy.ValidationErrors
 import com.netflix.spinnaker.clouddriver.orchestration.AtomicOperations
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider
-import com.netflix.spinnaker.clouddriver.aws.model.AmazonBlockDevice
-import com.netflix.spinnaker.clouddriver.aws.deploy.description.BasicAmazonDeployDescription
 import groovy.transform.stc.ClosureParams
 import groovy.transform.stc.SimpleType
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,7 +33,7 @@ import org.springframework.stereotype.Component
 @AmazonOperation(AtomicOperations.CREATE_SERVER_GROUP)
 class BasicAmazonDeployDescriptionValidator extends AmazonDescriptionValidationSupport<BasicAmazonDeployDescription> {
   @Autowired
-  AccountCredentialsProvider accountCredentialsProvider
+  AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider
 
   @Override
   void validate(List priorDescriptions, BasicAmazonDeployDescription description, ValidationErrors errors) {

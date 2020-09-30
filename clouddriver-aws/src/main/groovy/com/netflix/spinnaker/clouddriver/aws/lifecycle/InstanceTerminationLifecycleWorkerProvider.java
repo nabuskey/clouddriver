@@ -20,8 +20,8 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.netflix.spectator.api.Registry;
 import com.netflix.spinnaker.clouddriver.aws.deploy.ops.discovery.AwsEurekaSupport;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -47,7 +47,7 @@ public class InstanceTerminationLifecycleWorkerProvider {
 
   private final ObjectMapper objectMapper;
   private final AmazonClientProvider amazonClientProvider;
-  private final AccountCredentialsProvider accountCredentialsProvider;
+  private final AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider;
   private final InstanceTerminationConfigurationProperties properties;
   private final Provider<AwsEurekaSupport> discoverySupport;
   private final Registry registry;
@@ -56,7 +56,7 @@ public class InstanceTerminationLifecycleWorkerProvider {
   InstanceTerminationLifecycleWorkerProvider(
       @Qualifier("amazonObjectMapper") ObjectMapper objectMapper,
       AmazonClientProvider amazonClientProvider,
-      AccountCredentialsProvider accountCredentialsProvider,
+      AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
       InstanceTerminationConfigurationProperties properties,
       Provider<AwsEurekaSupport> discoverySupport,
       Registry registry) {

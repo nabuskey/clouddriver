@@ -18,7 +18,8 @@ package com.netflix.spinnaker.clouddriver.aws.lifecycle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider;
+import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.tags.EntityTagger;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -38,7 +39,7 @@ class LifecycleSubscriberConfiguration {
   LaunchFailureNotificationAgentProvider launchFailureNotificationAgentProvider(
       @Qualifier("amazonObjectMapper") ObjectMapper objectMapper,
       AmazonClientProvider amazonClientProvider,
-      AccountCredentialsProvider accountCredentialsProvider,
+      AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
       LaunchFailureConfigurationProperties properties,
       EntityTagger entityTagger) {
     return new LaunchFailureNotificationAgentProvider(

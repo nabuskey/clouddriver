@@ -19,12 +19,10 @@ package com.netflix.spinnaker.clouddriver.aws.health
 import com.amazonaws.AmazonClientException
 import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.ec2.AmazonEC2
-import com.amazonaws.services.ec2.model.AmazonEC2Exception
-import com.netflix.spectator.api.Counter
 import com.netflix.spectator.api.Registry
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider
 import groovy.transform.InheritConstructors
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -44,7 +42,7 @@ class AmazonHealthIndicator implements HealthIndicator {
 
   private static final Logger LOG = LoggerFactory.getLogger(AmazonHealthIndicator)
 
-  private final AccountCredentialsProvider accountCredentialsProvider
+  private final AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider
   private final AmazonClientProvider amazonClientProvider
 
   private final AtomicReference<Exception> lastException = new AtomicReference<>(null)
@@ -53,7 +51,7 @@ class AmazonHealthIndicator implements HealthIndicator {
   private final AtomicLong errors;
 
   @Autowired
-  AmazonHealthIndicator(AccountCredentialsProvider accountCredentialsProvider,
+  AmazonHealthIndicator(AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
                         AmazonClientProvider amazonClientProvider,
                         Registry registry) {
     this.accountCredentialsProvider = accountCredentialsProvider
