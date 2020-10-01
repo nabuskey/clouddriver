@@ -80,7 +80,7 @@ class ReservationReportCachingAgent implements CachingAgent, CustomScheduledAgen
 
   final AmazonClientProvider amazonClientProvider
   final AmazonS3DataProvider amazonS3DataProvider
-  final CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository;
+  final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository;
   final ObjectMapper objectMapper
   final AccountReservationDetailSerializer accountReservationDetailSerializer
   final Set<String> vpcOnlyAccounts
@@ -91,7 +91,7 @@ class ReservationReportCachingAgent implements CachingAgent, CustomScheduledAgen
   ReservationReportCachingAgent(Registry registry,
                                 AmazonClientProvider amazonClientProvider,
                                 AmazonS3DataProvider amazonS3DataProvider,
-                                CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
+                                CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
                                 ObjectMapper objectMapper,
                                 ExecutorService reservationReportPool,
                                 ApplicationContext ctx) {

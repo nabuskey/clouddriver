@@ -42,11 +42,11 @@ import org.springframework.stereotype.Component;
 public class UpdateAutoScalingGroup
     implements SagaAction<UpdateAutoScalingGroup.UpdateAutoScalingGroupCommand> {
   private final RegionScopedProviderFactory regionScopedProviderFactory;
-  private final CredentialsRepository<? extends NetflixAmazonCredentials> credentialsRepository;
+  private final CredentialsRepository<NetflixAmazonCredentials> credentialsRepository;
 
   public UpdateAutoScalingGroup(
       RegionScopedProviderFactory regionScopedProviderFactory,
-      CredentialsRepository<? extends NetflixAmazonCredentials> credentialsRepository) {
+      CredentialsRepository<NetflixAmazonCredentials> credentialsRepository) {
     this.regionScopedProviderFactory = regionScopedProviderFactory;
     this.credentialsRepository = credentialsRepository;
   }

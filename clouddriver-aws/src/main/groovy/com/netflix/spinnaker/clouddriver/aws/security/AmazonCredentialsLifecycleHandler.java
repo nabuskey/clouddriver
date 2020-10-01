@@ -76,7 +76,7 @@ public class AmazonCredentialsLifecycleHandler
   protected final EddaTimeoutConfig eddaTimeoutConfig;
   protected final DynamicConfigService dynamicConfigService;
   protected final DeployDefaults deployDefaults;
-  protected final CredentialsRepository<? extends NetflixAmazonCredentials>
+  protected final CredentialsRepository<NetflixAmazonCredentials>
       accountCredentialsRepository; // Circular dependency.
   private Set<String> publicRegions = new HashSet<>();
   private Set<String> awsInfraRegions = new HashSet<>();

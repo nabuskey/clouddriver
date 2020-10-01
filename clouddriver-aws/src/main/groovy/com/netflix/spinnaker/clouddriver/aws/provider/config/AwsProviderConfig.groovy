@@ -38,7 +38,7 @@ import java.util.concurrent.Executors
 @EnableConfigurationProperties(ReservationReportConfigurationProperties)
 class AwsProviderConfig {
   @Bean
-  AwsProvider awsProvider(CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository) {
+  AwsProvider awsProvider(CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository) {
       return new AwsProvider(accountCredentialsRepository, Collections.newSetFromMap(new ConcurrentHashMap<Agent, Boolean>()))
   }
 

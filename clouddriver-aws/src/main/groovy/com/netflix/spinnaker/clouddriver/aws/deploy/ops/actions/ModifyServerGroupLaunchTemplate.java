@@ -46,12 +46,12 @@ import org.springframework.stereotype.Component;
 public class ModifyServerGroupLaunchTemplate
     implements SagaAction<ModifyServerGroupLaunchTemplate.ModifyServerGroupLaunchTemplateCommand> {
   private final BlockDeviceConfig blockDeviceConfig;
-  private final CredentialsRepository<? extends NetflixAmazonCredentials> credentialsRepository;
+  private final CredentialsRepository<NetflixAmazonCredentials> credentialsRepository;
   private final RegionScopedProviderFactory regionScopedProviderFactory;
 
   public ModifyServerGroupLaunchTemplate(
       BlockDeviceConfig blockDeviceConfig,
-      CredentialsRepository<? extends NetflixAmazonCredentials> credentialsRepository,
+      CredentialsRepository<NetflixAmazonCredentials> credentialsRepository,
       RegionScopedProviderFactory regionScopedProviderFactory) {
     this.blockDeviceConfig = blockDeviceConfig;
     this.credentialsRepository = credentialsRepository;

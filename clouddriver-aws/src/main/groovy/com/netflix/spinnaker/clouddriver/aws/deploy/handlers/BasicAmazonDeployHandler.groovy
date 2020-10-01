@@ -74,7 +74,7 @@ class BasicAmazonDeployHandler implements DeployHandler<BasicAmazonDeployDescrip
   }
 
   private final RegionScopedProviderFactory regionScopedProviderFactory
-  private final CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository
+  private final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository
   private final AwsConfiguration.AmazonServerGroupProvider amazonServerGroupProvider
   private final AwsConfiguration.DeployDefaults deployDefaults
   private final ScalingPolicyCopier scalingPolicyCopier
@@ -84,7 +84,7 @@ class BasicAmazonDeployHandler implements DeployHandler<BasicAmazonDeployDescrip
   private List<CreateServerGroupEvent> deployEvents = []
 
   BasicAmazonDeployHandler(RegionScopedProviderFactory regionScopedProviderFactory,
-                           CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
+                           CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
                            AwsConfiguration.AmazonServerGroupProvider amazonServerGroupProvider,
                            AwsConfiguration.DeployDefaults deployDefaults,
                            ScalingPolicyCopier scalingPolicyCopier,

@@ -67,8 +67,7 @@ public class AmazonInstanceTypeCachingAgent implements CachingAgent {
 
   // https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-west-2/index.json
   private final String region;
-  private final CredentialsRepository<? extends NetflixAmazonCredentials>
-      accountCredentialsRepository;
+  private final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository;
   private final URI pricingUri;
   private final HttpHost pricingHost;
   private final HttpClient httpClient;
@@ -76,15 +75,14 @@ public class AmazonInstanceTypeCachingAgent implements CachingAgent {
       new ObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
   public AmazonInstanceTypeCachingAgent(
-      String region,
-      CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository) {
+      String region, CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository) {
     this(region, accountCredentialsRepository, HttpClients.createDefault());
   }
 
   // VisibleForTesting
   AmazonInstanceTypeCachingAgent(
       String region,
-      CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
+      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
       HttpClient httpClient) {
     this.region = region;
     this.accountCredentialsRepository = accountCredentialsRepository;

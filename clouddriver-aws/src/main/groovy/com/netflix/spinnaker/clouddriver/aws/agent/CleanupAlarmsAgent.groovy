@@ -45,20 +45,20 @@ class CleanupAlarmsAgent implements RunnableAgent, CustomScheduledAgent {
   public static final Pattern ALARM_NAME_PATTERN = Pattern.compile(".+-v[0-9]{3}-alarm-.+")
 
   final AmazonClientProvider amazonClientProvider
-  final CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository
+  final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository
   final long pollIntervalMillis
   final long timeoutMillis
   final int daysToLeave
 
 
   CleanupAlarmsAgent(AmazonClientProvider amazonClientProvider,
-                     CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
+                     CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
                      int daysToLeave) {
     this(amazonClientProvider, accountCredentialsRepository, POLL_INTERVAL_MILLIS, DEFAULT_TIMEOUT_MILLIS, daysToLeave)
   }
 
   CleanupAlarmsAgent(AmazonClientProvider amazonClientProvider,
-                     CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
+                     CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
                      long pollIntervalMillis,
                      long timeoutMills,
                      int daysToLeave) {

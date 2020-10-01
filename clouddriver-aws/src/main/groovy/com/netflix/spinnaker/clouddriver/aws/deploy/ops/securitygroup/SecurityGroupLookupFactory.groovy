@@ -30,10 +30,10 @@ import org.slf4j.LoggerFactory
 class SecurityGroupLookupFactory {
 
   private final AmazonClientProvider amazonClientProvider
-  private final CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository
+  private final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository
 
   SecurityGroupLookupFactory(AmazonClientProvider amazonClientProvider,
-                             CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository) {
+                             CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository) {
     this.amazonClientProvider = amazonClientProvider
     this.accountCredentialsRepository = accountCredentialsRepository
   }

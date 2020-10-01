@@ -35,7 +35,7 @@ class AwsProvider extends AgentSchedulerAware implements SearchableProvider, Eur
 
   final KeyParser keyParser = new Keys()
 
-  final CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository
+  final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository
 
   final Set<String> defaultCaches = [
     LOAD_BALANCERS.ns,
@@ -58,7 +58,7 @@ class AwsProvider extends AgentSchedulerAware implements SearchableProvider, Eur
   final Collection<Agent> agents
   private Collection<HealthProvidingCachingAgent> healthAgents
 
-  AwsProvider(CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository, Collection<Agent> agents) {
+  AwsProvider(CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository, Collection<Agent> agents) {
     this.agents = agents
     this.accountCredentialsRepository = accountCredentialsRepository
     synchronizeHealthAgents()

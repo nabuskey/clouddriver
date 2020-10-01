@@ -76,7 +76,7 @@ public class ProviderHelpers {
   public static BuildResult buildAwsInfrastructureAgents(
       NetflixAmazonCredentials credentials,
       AwsInfrastructureProvider awsInfrastructureProvider,
-      CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
+      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
       AmazonClientProvider amazonClientProvider,
       ObjectMapper amazonObjectMapper,
       Registry registry,
@@ -115,7 +115,7 @@ public class ProviderHelpers {
 
   public static BuildResult buildAwsProviderAgents(
       NetflixAmazonCredentials credentials,
-      CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
+      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
       AmazonClientProvider amazonClientProvider,
       ObjectMapper objectMapper,
       Registry registry,
@@ -234,7 +234,7 @@ public class ProviderHelpers {
 
   public static List<Agent> buildAwsCleanupAgents(
       NetflixAmazonCredentials credentials,
-      CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
+      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
       AmazonClientProvider amazonClientProvider,
       AwsCleanupProvider awsCleanupProvider,
       AwsConfiguration.DeployDefaults deployDefaults,

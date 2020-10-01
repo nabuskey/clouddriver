@@ -98,7 +98,7 @@ class AmazonCredentialsInitializer {
     value = NetflixAmazonCredentials.class,
     parameterizedContainer = AbstractCredentialsLoader.class)
   AbstractCredentialsLoader<? extends NetflixAmazonCredentials> amazonCredentialsLoader(
-    CredentialsParser<Account, ? extends NetflixAmazonCredentials>  amazonCredentialsParser,
+    CredentialsParser<Account, NetflixAmazonCredentials>  amazonCredentialsParser,
     @Nullable CredentialsDefinitionSource<Account> amazonCredentialsSource,
     CredentialsConfig credentialsConfig,
     CredentialsRepository<NetflixAmazonCredentials> repository,
@@ -122,12 +122,11 @@ class AmazonCredentialsInitializer {
     value = Account.class,
     parameterizedContainer = CredentialsDefinitionSource.class
   )
-  CredentialsInitializerSynchronizable AmazonCredentialsInitializerSynchronizable(
+  CredentialsInitializerSynchronizable amazonCredentialsInitializerSynchronizable(
     AbstractCredentialsLoader<? extends NetflixAmazonCredentials> amazonCredentialsLoader
   ) {
     final Poller<? extends NetflixAmazonCredentials> poller = new Poller<>(amazonCredentialsLoader);
     return new CredentialsInitializerSynchronizable() {
-      @PostConstruct
       @Override
       void synchronize() {
         poller.run()

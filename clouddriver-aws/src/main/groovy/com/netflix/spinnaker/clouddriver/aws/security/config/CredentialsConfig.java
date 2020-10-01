@@ -63,7 +63,7 @@ public class CredentialsConfig {
       this.deprecated = deprecated;
     }
 
-    Region copyOf() {
+    public Region copyOf() {
       Region clone = new Region();
       clone.setName(getName());
       clone.setAvailabilityZones(getAvailabilityZones());

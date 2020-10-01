@@ -61,12 +61,12 @@ public class PrepareModifyServerGroupLaunchTemplate
     implements SagaAction<
         PrepareModifyServerGroupLaunchTemplate.PrepareModifyServerGroupLaunchTemplateCommand> {
   private final BlockDeviceConfig blockDeviceConfig;
-  private final CredentialsRepository<? extends NetflixAmazonCredentials> credentialsRepository;
+  private final CredentialsRepository<NetflixAmazonCredentials> credentialsRepository;
   private final RegionScopedProviderFactory regionScopedProviderFactory;
 
   public PrepareModifyServerGroupLaunchTemplate(
       BlockDeviceConfig blockDeviceConfig,
-      CredentialsRepository<? extends NetflixAmazonCredentials> credentialsRepository,
+      CredentialsRepository<NetflixAmazonCredentials> credentialsRepository,
       RegionScopedProviderFactory regionScopedProviderFactory) {
     this.blockDeviceConfig = blockDeviceConfig;
     this.credentialsRepository = credentialsRepository;

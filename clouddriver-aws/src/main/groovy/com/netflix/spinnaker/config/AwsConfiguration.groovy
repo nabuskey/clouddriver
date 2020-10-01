@@ -187,7 +187,7 @@ class AwsConfiguration {
   @Bean
   @DependsOn('amazonCredentialsLoader')
   BasicAmazonDeployHandler basicAmazonDeployHandler(RegionScopedProviderFactory regionScopedProviderFactory,
-                                                    CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
+                                                    CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
                                                     DeployDefaults deployDefaults,
                                                     ScalingPolicyCopier scalingPolicyCopier,
                                                     BlockDeviceConfig blockDeviceConfig,
@@ -222,7 +222,7 @@ class AwsConfiguration {
   @Bean
   @DependsOn('amazonCredentialsLoader')
   SecurityGroupLookupFactory securityGroupLookup(AmazonClientProvider amazonClientProvider,
-                                                 CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository) {
+                                                 CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository) {
     new SecurityGroupLookupFactory(amazonClientProvider, accountCredentialsRepository)
   }
 

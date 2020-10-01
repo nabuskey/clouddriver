@@ -55,10 +55,7 @@ public class EcsProviderConfig {
       Registry registry,
       IamPolicyReader iamPolicyReader,
       ObjectMapper objectMapper) {
-    EcsProvider provider =
-        new EcsProvider(
-            accountCredentialsRepository,
-            Collections.newSetFromMap(new ConcurrentHashMap<Agent, Boolean>()));
+    EcsProvider provider = new EcsProvider(Collections.newSetFromMap(new ConcurrentHashMap<>()));
     synchronizeEcsProvider(
         provider,
         accountCredentialsRepository,
@@ -169,7 +166,7 @@ public class EcsProviderConfig {
         }
       }
     }
-
+    ProviderUtils.rescheduleAgents(ecsProvider, newAgents);
     ecsProvider.getAgents().addAll(newAgents);
     ecsProvider.synchronizeHealthAgents();
   }

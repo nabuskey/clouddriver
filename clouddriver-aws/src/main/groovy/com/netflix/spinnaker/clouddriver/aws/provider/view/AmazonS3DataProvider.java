@@ -50,8 +50,7 @@ import org.springframework.stereotype.Component;
 public class AmazonS3DataProvider implements DataProvider {
   private final ObjectMapper objectMapper;
   private final AmazonClientProvider amazonClientProvider;
-  private final CredentialsRepository<? extends NetflixAmazonCredentials>
-      accountCredentialsRepository;
+  private final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository;
   private final AmazonS3StaticDataProviderConfiguration configuration;
 
   private final Set<String> supportedIdentifiers;
@@ -86,7 +85,7 @@ public class AmazonS3DataProvider implements DataProvider {
   public AmazonS3DataProvider(
       @Qualifier("amazonObjectMapper") ObjectMapper objectMapper,
       AmazonClientProvider amazonClientProvider,
-      CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
+      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
       AmazonS3StaticDataProviderConfiguration configuration) {
     this.objectMapper = objectMapper;
     this.amazonClientProvider = amazonClientProvider;

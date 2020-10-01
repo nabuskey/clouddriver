@@ -40,17 +40,17 @@ class CleanupDetachedInstancesAgent implements RunnableAgent, CustomScheduledAge
   public static final long DEFAULT_TIMEOUT_MILLIS = TimeUnit.MINUTES.toMillis(20)
 
   final AmazonClientProvider amazonClientProvider
-  final CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository
+  final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository
   final long pollIntervalMillis
   final long timeoutMillis
 
   CleanupDetachedInstancesAgent(AmazonClientProvider amazonClientProvider,
-                                CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository) {
+                                CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository) {
     this(amazonClientProvider, accountCredentialsRepository, DEFAULT_POLL_INTERVAL_MILLIS, DEFAULT_TIMEOUT_MILLIS)
   }
 
   CleanupDetachedInstancesAgent(AmazonClientProvider amazonClientProvider,
-                                CredentialsRepository<? extends NetflixAmazonCredentials> accountCredentialsRepository,
+                                CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
                                 long pollIntervalMillis,
                                 long timeoutMills) {
     this.amazonClientProvider = amazonClientProvider
