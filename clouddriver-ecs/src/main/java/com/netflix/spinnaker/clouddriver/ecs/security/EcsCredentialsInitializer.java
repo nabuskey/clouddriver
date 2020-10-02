@@ -27,6 +27,7 @@ import com.netflix.spinnaker.credentials.CredentialsLifecycleHandler;
 import com.netflix.spinnaker.credentials.CredentialsRepository;
 import com.netflix.spinnaker.credentials.MapBackedCredentialsRepository;
 import com.netflix.spinnaker.credentials.definition.AbstractCredentialsLoader;
+import com.netflix.spinnaker.credentials.definition.BasicCredentialsLoader;
 import com.netflix.spinnaker.credentials.definition.CredentialsDefinitionSource;
 import com.netflix.spinnaker.credentials.definition.CredentialsParser;
 import javax.annotation.Nullable;
@@ -79,8 +80,7 @@ public class EcsCredentialsInitializer {
       ecsCredentialsSource = ecsCredentialsConfig::getAccounts;
     }
 
-    return new BasicCredentialsLoader<>(
-        ecsCredentialsSource, amazonCredentialsParser, repository);
+    return new BasicCredentialsLoader<>(ecsCredentialsSource, amazonCredentialsParser, repository);
   }
 
   //  @Bean
