@@ -79,7 +79,7 @@ public class EcsCredentialsInitializer {
       ecsCredentialsSource = ecsCredentialsConfig::getAccounts;
     }
 
-    return new ECSBasicCredentialsLoader<>(
+    return new BasicCredentialsLoader<>(
         ecsCredentialsSource, amazonCredentialsParser, repository);
   }
 
