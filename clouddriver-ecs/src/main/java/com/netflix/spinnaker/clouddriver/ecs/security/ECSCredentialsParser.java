@@ -17,39 +17,35 @@
 
 package com.netflix.spinnaker.clouddriver.ecs.security;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAssumeRoleAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsConfig;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
 import com.netflix.spinnaker.credentials.definition.CredentialsParser;
-import java.util.Collections;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 // public class ECSCredentialsParser<T extends ECSCredentialsConfig.Account, U extends
 // NetflixECSCredentials, V extends NetflixAmazonCredentials>
 
 public class ECSCredentialsParser<T extends NetflixAmazonCredentials>
-    implements CredentialsParser<ECSCredentialsConfig.Account, NetflixECSCredentials> {
+    implements CredentialsParser<ECSCredentialsConfig.ECSAccount, NetflixECSCredentials> {
 
   private final AccountCredentialsProvider accountCredentialsProvider;
-  private final CredentialsLoader<T> credentialsLoader;
+  private final CredentialsParser<CredentialsConfig.Account, NetflixAmazonCredentials>
+      credentialsLoader;
 
   public ECSCredentialsParser(
-      Class<T> credentialsType,
       AccountCredentialsProvider accountCredentialsProvider,
-      AWSCredentialsProvider awsCredentialsProvider,
-      AmazonClientProvider amazonClientProvider) {
+      CredentialsParser<CredentialsConfig.Account, NetflixAmazonCredentials> credentialsLoader) {
     this.accountCredentialsProvider = accountCredentialsProvider;
-    this.credentialsLoader =
-        new CredentialsLoader<>(awsCredentialsProvider, amazonClientProvider, credentialsType);
+    this.credentialsLoader = credentialsLoader;
   }
 
   @Nullable
   @Override
-  public NetflixECSCredentials parse(ECSCredentialsConfig.Account credentials) {
+  public NetflixECSCredentials parse(ECSCredentialsConfig.@NotNull ECSAccount credentials) {
     for (AccountCredentials accountCredentials : accountCredentialsProvider.getAll()) {
       if (accountCredentials instanceof NetflixAmazonCredentials
           && credentials.getAwsAccount().equals(accountCredentials.getName())) {
@@ -58,12 +54,10 @@ public class ECSCredentialsParser<T extends NetflixAmazonCredentials>
             (NetflixAmazonCredentials) accountCredentials;
         CredentialsConfig.Account account =
             EcsAccountBuilder.build(netflixAmazonCredentials, credentials.getName(), "ecs");
-        CredentialsConfig ecsCopy = new CredentialsConfig();
-        ecsCopy.setAccounts(Collections.singletonList(account));
 
         try {
           return new NetflixAssumeRoleEcsCredentials(
-              (NetflixAssumeRoleAmazonCredentials) credentialsLoader.load(ecsCopy).get(0),
+              (NetflixAssumeRoleAmazonCredentials) credentialsLoader.parse(account),
               credentials.getName());
         } catch (Throwable throwable) {
           throwable.printStackTrace();

@@ -16,9 +16,8 @@
 
 package com.netflix.spinnaker.clouddriver.ecs.security;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
+import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsConfig;
 import com.netflix.spinnaker.clouddriver.ecs.EcsCloudProvider;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
@@ -58,29 +57,29 @@ public class EcsCredentialsInitializer {
 
   @Bean
   @DependsOn("amazonCredentialsLoader")
-  CredentialsParser<ECSCredentialsConfig.Account, NetflixECSCredentials> ecsCredentialsParser(
-      Class<? extends NetflixAmazonCredentials> credentialsType,
+  CredentialsParser<ECSCredentialsConfig.ECSAccount, NetflixECSCredentials> ecsCredentialsParser(
       AccountCredentialsProvider accountCredentialsProvider,
-      AWSCredentialsProvider awsCredentialsProvider,
-      AmazonClientProvider amazonClientProvider) {
-    return new ECSCredentialsParser<>(
-        credentialsType, accountCredentialsProvider, awsCredentialsProvider, amazonClientProvider);
+      CredentialsParser<CredentialsConfig.Account, NetflixAmazonCredentials>
+          amazonCredentialsParser) {
+    return new ECSCredentialsParser<NetflixECSCredentials>(
+        accountCredentialsProvider, amazonCredentialsParser);
   }
 
   @Bean
   AbstractCredentialsLoader<NetflixECSCredentials> ecsCredentialsLoader(
-      CredentialsParser<ECSCredentialsConfig.Account, NetflixECSCredentials>
+      CredentialsParser<ECSCredentialsConfig.ECSAccount, NetflixECSCredentials>
           amazonCredentialsParser,
-      @Nullable CredentialsDefinitionSource<ECSCredentialsConfig.Account> ecsCredentialsSource,
+      @Nullable CredentialsDefinitionSource<ECSCredentialsConfig.ECSAccount> ecsCredentialsSource,
       CredentialsRepository<NetflixECSCredentials> repository,
       ECSCredentialsConfig ecsCredentialsConfig,
       CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository) {
     compositeCredentialsRepository.registerRepository(repository);
     if (ecsCredentialsSource == null) {
-      ecsCredentialsSource = ecsCredentialsConfig::getAccounts;
+      ecsCredentialsSource = ecsCredentialsConfig::getEcsAccounts;
     }
 
-    return new BasicCredentialsLoader<>(ecsCredentialsSource, amazonCredentialsParser, repository);
+    return new BasicCredentialsLoader<ECSCredentialsConfig.ECSAccount, NetflixECSCredentials>(
+        ecsCredentialsSource, amazonCredentialsParser, repository);
   }
 
   //  @Bean

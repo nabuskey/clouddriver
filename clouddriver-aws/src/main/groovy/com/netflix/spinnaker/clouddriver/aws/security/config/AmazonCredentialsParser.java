@@ -175,7 +175,7 @@ public class AmazonCredentialsParser<U extends Account, V extends NetflixAmazonC
     CredentialsConfig config = new CredentialsConfig();
     Account account = new Account();
     account.setName(accountName);
-    config.setAccounts(Arrays.asList(account));
+    config.setAccounts(Collections.singletonList(account));
     List<V> result = load(config);
     if (result.size() != 1) {
       throw new IllegalStateException("failed to create account");

@@ -34,7 +34,6 @@ public class EcsProviderConfig {
 
   @Bean
   public EcsProvider ecsProvider() {
-    EcsProvider provider = new EcsProvider(Collections.newSetFromMap(new ConcurrentHashMap<>()));
-    return provider;
+    return new EcsProvider(Collections.newSetFromMap(new ConcurrentHashMap<>()));
   }
 }
