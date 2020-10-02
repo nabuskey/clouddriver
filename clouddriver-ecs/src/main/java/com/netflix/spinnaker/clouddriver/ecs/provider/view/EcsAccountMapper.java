@@ -27,11 +27,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
 @Component
-@DependsOn("netflixECSCredentials")
+// @DependsOn("netflixECSCredentials")
 public class EcsAccountMapper {
 
   final AccountCredentialsProvider accountCredentialsProvider;

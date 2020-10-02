@@ -36,6 +36,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.DependsOn
 import org.springframework.context.annotation.Lazy
+import org.springframework.context.annotation.Primary
 
 import javax.annotation.Nullable
 import javax.annotation.PostConstruct
@@ -74,6 +75,7 @@ class AmazonCredentialsInitializer {
   }
 
   @Bean
+  @Primary // needed for ECS repo. ECS and AWS repos should be merged.
   @ConditionalOnMissingBean(
     value = NetflixAmazonCredentials.class,
     parameterizedContainer = CredentialsRepository.class)

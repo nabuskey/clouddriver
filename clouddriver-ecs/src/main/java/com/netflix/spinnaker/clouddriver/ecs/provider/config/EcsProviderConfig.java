@@ -36,7 +36,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 
 @Configuration
 public class EcsProviderConfig {
@@ -47,7 +46,7 @@ public class EcsProviderConfig {
   }
 
   @Bean
-  @DependsOn("netflixECSCredentials")
+  //  @DependsOn("netflixECSCredentials")
   public EcsProvider ecsProvider(
       AccountCredentialsRepository accountCredentialsRepository,
       AmazonClientProvider amazonClientProvider,
