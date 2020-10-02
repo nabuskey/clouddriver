@@ -20,7 +20,9 @@ import com.amazonaws.auth.AWSCredentialsProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.ecs.EcsCloudProvider;
+import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
+import com.netflix.spinnaker.credentials.CompositeCredentialsRepository;
 import com.netflix.spinnaker.credentials.CredentialsLifecycleHandler;
 import com.netflix.spinnaker.credentials.CredentialsRepository;
 import com.netflix.spinnaker.credentials.MapBackedCredentialsRepository;
@@ -70,10 +72,13 @@ public class EcsCredentialsInitializer {
           amazonCredentialsParser,
       @Nullable CredentialsDefinitionSource<ECSCredentialsConfig.Account> ecsCredentialsSource,
       CredentialsRepository<NetflixECSCredentials> repository,
-      ECSCredentialsConfig ecsCredentialsConfig) {
+      ECSCredentialsConfig ecsCredentialsConfig,
+      CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository) {
+    compositeCredentialsRepository.registerRepository(repository);
     if (ecsCredentialsSource == null) {
       ecsCredentialsSource = ecsCredentialsConfig::getAccounts;
     }
+
     return new ECSBasicCredentialsLoader<>(
         ecsCredentialsSource, amazonCredentialsParser, repository);
   }
