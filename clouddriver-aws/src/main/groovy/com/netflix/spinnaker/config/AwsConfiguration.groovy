@@ -208,11 +208,6 @@ class AwsConfiguration {
   }
 
   @Bean
-  AwsCleanupProvider awsOperationProvider() {
-    return new AwsCleanupProvider(Collections.newSetFromMap(new ConcurrentHashMap<Agent, Boolean>()))
-  }
-
-  @Bean
   @DependsOn('amazonCredentialsRepository')
   SecurityGroupLookupFactory securityGroupLookup(
     AmazonClientProvider amazonClientProvider,

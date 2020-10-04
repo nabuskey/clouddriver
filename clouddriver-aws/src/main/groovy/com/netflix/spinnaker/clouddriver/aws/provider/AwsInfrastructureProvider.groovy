@@ -17,37 +17,25 @@
 package com.netflix.spinnaker.clouddriver.aws.provider
 
 import com.fasterxml.jackson.core.type.TypeReference
-import com.netflix.spinnaker.cats.agent.Agent
-import com.netflix.spinnaker.cats.agent.AgentSchedulerAware
-import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider
 import com.netflix.spinnaker.clouddriver.cache.KeyParser
 import com.netflix.spinnaker.clouddriver.cache.SearchableProvider
 import com.netflix.spinnaker.clouddriver.aws.cache.Keys
+import com.netflix.spinnaker.clouddriver.security.BaseProvider
+import org.springframework.stereotype.Component
 
 import static com.netflix.spinnaker.clouddriver.aws.cache.Keys.Namespace.SECURITY_GROUPS
-import static com.netflix.spinnaker.clouddriver.cache.SearchableProvider.SearchableResource
 
-class AwsInfrastructureProvider extends AgentSchedulerAware implements SearchableProvider {
+@Component
+class AwsInfrastructureProvider extends BaseProvider implements SearchableProvider {
   public static final TypeReference<Map<String, Object>> ATTRIBUTES = new TypeReference<Map<String, Object>>() {}
 
   public static final String PROVIDER_NAME = AwsInfrastructureProvider.name
 
-  private final Collection<Agent> agents
-
   private final KeyParser keyParser = new Keys()
-
-  AwsInfrastructureProvider(Collection<Agent> agents) {
-    this.agents = agents
-  }
 
   @Override
   String getProviderName() {
     return PROVIDER_NAME
-  }
-
-  @Override
-  Collection<Agent> getAgents() {
-    agents
   }
 
   final Set<String> defaultCaches = [SECURITY_GROUPS.ns].asImmutable()

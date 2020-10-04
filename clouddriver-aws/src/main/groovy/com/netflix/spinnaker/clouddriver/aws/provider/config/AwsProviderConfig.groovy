@@ -39,7 +39,7 @@ import java.util.concurrent.Executors
 class AwsProviderConfig {
   @Bean
   AwsProvider awsProvider(CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository) {
-      return new AwsProvider(accountCredentialsRepository, Collections.newSetFromMap(new ConcurrentHashMap<Agent, Boolean>()))
+      return new AwsProvider(accountCredentialsRepository)
   }
 
   @Bean

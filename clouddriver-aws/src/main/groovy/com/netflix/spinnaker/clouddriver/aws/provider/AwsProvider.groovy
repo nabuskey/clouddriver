@@ -25,11 +25,12 @@ import com.netflix.spinnaker.clouddriver.cache.KeyParser
 import com.netflix.spinnaker.clouddriver.cache.SearchableProvider
 import com.netflix.spinnaker.clouddriver.core.provider.agent.HealthProvidingCachingAgent
 import com.netflix.spinnaker.clouddriver.eureka.provider.agent.EurekaAwareProvider
+import com.netflix.spinnaker.clouddriver.security.BaseProvider
 import com.netflix.spinnaker.credentials.CredentialsRepository
 
 import static com.netflix.spinnaker.clouddriver.core.provider.agent.Namespace.*
 
-class AwsProvider extends AgentSchedulerAware implements SearchableProvider, EurekaAwareProvider {
+class AwsProvider extends BaseProvider implements SearchableProvider, EurekaAwareProvider {
 
   public static final String PROVIDER_NAME = AwsProvider.name
 
@@ -55,11 +56,10 @@ class AwsProvider extends AgentSchedulerAware implements SearchableProvider, Eur
     (new AmazonSearchableResource(INSTANCES.ns)): new InstanceSearchResultHydrator(),
   ]
 
-  final Collection<Agent> agents
   private Collection<HealthProvidingCachingAgent> healthAgents
 
-  AwsProvider(CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository, Collection<Agent> agents) {
-    this.agents = agents
+  AwsProvider(CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository) {
+    super()
     this.accountCredentialsRepository = accountCredentialsRepository
     synchronizeHealthAgents()
   }
@@ -76,9 +76,7 @@ class AwsProvider extends AgentSchedulerAware implements SearchableProvider, Eur
   }
 
   Collection<HealthProvidingCachingAgent> getHealthAgents() {
-    def allHealthAgents = []
-    allHealthAgents.addAll(this.healthAgents)
-    Collections.unmodifiableCollection(allHealthAgents)
+    Collections.unmodifiableCollection(this.healthAgents)
   }
 
   @Override

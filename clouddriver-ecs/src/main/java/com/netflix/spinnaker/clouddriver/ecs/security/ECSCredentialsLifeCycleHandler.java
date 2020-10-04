@@ -69,15 +69,13 @@ public class ECSCredentialsLifeCycleHandler
 
   @Override
   public void credentialsUpdated(@NotNull NetflixECSCredentials credentials) {
-    ProviderUtils.unscheduleAndDeregisterAgents(
-        Collections.singleton(credentials.getName()), catsModule);
+    ecsProvider.removeAgentsForAccounts(Collections.singleton(credentials.getName()));
     scheduleAgents(credentials);
   }
 
   @Override
   public void credentialsDeleted(NetflixECSCredentials credentials) {
-    ProviderUtils.unscheduleAndDeregisterAgents(
-        Collections.singleton(credentials.getName()), catsModule);
+    ecsProvider.removeAgentsForAccounts(Collections.singleton(credentials.getName()));
   }
 
   private void scheduleAgents(NetflixECSCredentials credentials) {
@@ -161,8 +159,7 @@ public class ECSCredentialsLifeCycleHandler
       }
     }
 
-    ProviderUtils.rescheduleAgents(ecsProvider, newAgents);
-    ecsProvider.getAgents().addAll(newAgents);
+    ecsProvider.addAgents(newAgents);
     ecsProvider.synchronizeHealthAgents();
   }
 }

@@ -15,7 +15,7 @@
  *
  */
 
-package com.netflix.spinnaker.clouddriver.aws.provider.config;
+package com.netflix.spinnaker.clouddriver.aws.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.spectator.api.Registry;
@@ -27,9 +27,6 @@ import com.netflix.spinnaker.clouddriver.aws.agent.CleanupAlarmsAgent;
 import com.netflix.spinnaker.clouddriver.aws.agent.CleanupDetachedInstancesAgent;
 import com.netflix.spinnaker.clouddriver.aws.agent.ReconcileClassicLinkSecurityGroupsAgent;
 import com.netflix.spinnaker.clouddriver.aws.edda.EddaApiFactory;
-import com.netflix.spinnaker.clouddriver.aws.provider.AwsCleanupProvider;
-import com.netflix.spinnaker.clouddriver.aws.provider.AwsInfrastructureProvider;
-import com.netflix.spinnaker.clouddriver.aws.provider.AwsProvider;
 import com.netflix.spinnaker.clouddriver.aws.provider.agent.AmazonApplicationLoadBalancerCachingAgent;
 import com.netflix.spinnaker.clouddriver.aws.provider.agent.AmazonCertificateCachingAgent;
 import com.netflix.spinnaker.clouddriver.aws.provider.agent.AmazonCloudFormationCachingAgent;
@@ -57,20 +54,19 @@ import com.netflix.spinnaker.clouddriver.security.ProviderUtils;
 import com.netflix.spinnaker.config.AwsConfiguration;
 import com.netflix.spinnaker.credentials.CredentialsRepository;
 import com.netflix.spinnaker.kork.dynamicconfig.DynamicConfigService;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 
 public class ProviderHelpers {
+
+  @Getter
   @RequiredArgsConstructor
   public static class BuildResult {
-    public final List<Agent> agents;
-    public final Set<String> regionsToAdd;
+    private final List<Agent> agents;
+    private final Set<String> regionsToAdd;
   }
 
   public static BuildResult buildAwsInfrastructureAgents(
@@ -250,25 +246,19 @@ public class ProviderHelpers {
         }
       }
     }
-    //    AccountCredentialsRepository dependency
+    // AccountCredentialsRepository dependency
     // Might not be safe when parallel processing
     if (awsCleanupProvider.getAgentScheduler() != null) {
       if (awsConfigurationProperties.getCleanup().getAlarms().getEnabled()) {
-        awsCleanupProvider
-            .getAgents()
-            .add(
-                new CleanupAlarmsAgent(
-                    amazonClientProvider,
-                    accountCredentialsRepository,
-                    awsConfigurationProperties.getCleanup().getAlarms().getDaysToKeep()));
+        newlyAddedAgents.add(
+            new CleanupAlarmsAgent(
+                amazonClientProvider,
+                accountCredentialsRepository,
+                awsConfigurationProperties.getCleanup().getAlarms().getDaysToKeep()));
       }
-      awsCleanupProvider
-          .getAgents()
-          .add(
-              new CleanupDetachedInstancesAgent(
-                  amazonClientProvider, accountCredentialsRepository));
+      newlyAddedAgents.add(
+          new CleanupDetachedInstancesAgent(amazonClientProvider, accountCredentialsRepository));
     }
-    awsCleanupProvider.getAgents().addAll(newlyAddedAgents);
     return newlyAddedAgents;
   }
 }

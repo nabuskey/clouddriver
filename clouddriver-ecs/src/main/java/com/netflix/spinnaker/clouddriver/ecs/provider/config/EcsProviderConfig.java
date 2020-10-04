@@ -19,8 +19,6 @@ package com.netflix.spinnaker.clouddriver.ecs.provider.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.spinnaker.clouddriver.ecs.provider.EcsProvider;
 import com.netflix.spinnaker.clouddriver.ecs.provider.agent.IamPolicyReader;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,6 +32,6 @@ public class EcsProviderConfig {
 
   @Bean
   public EcsProvider ecsProvider() {
-    return new EcsProvider(Collections.newSetFromMap(new ConcurrentHashMap<>()));
+    return new EcsProvider();
   }
 }

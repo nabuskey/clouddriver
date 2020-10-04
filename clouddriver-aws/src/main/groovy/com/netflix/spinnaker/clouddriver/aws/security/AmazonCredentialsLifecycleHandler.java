@@ -28,10 +28,9 @@ import com.netflix.spinnaker.clouddriver.aws.edda.EddaApiFactory;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsCleanupProvider;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsInfrastructureProvider;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsProvider;
+import com.netflix.spinnaker.clouddriver.aws.provider.ProviderHelpers;
 import com.netflix.spinnaker.clouddriver.aws.provider.agent.ReservationReportCachingAgent;
-import com.netflix.spinnaker.clouddriver.aws.provider.config.ProviderHelpers;
 import com.netflix.spinnaker.clouddriver.aws.provider.view.AmazonS3DataProvider;
-import com.netflix.spinnaker.clouddriver.security.ProviderUtils;
 import com.netflix.spinnaker.config.AwsConfiguration.DeployDefaults;
 import com.netflix.spinnaker.credentials.CredentialsLifecycleHandler;
 import com.netflix.spinnaker.credentials.CredentialsRepository;
@@ -89,17 +88,25 @@ public class AmazonCredentialsLifecycleHandler
 
   @Override
   public void credentialsUpdated(@NotNull NetflixAmazonCredentials credentials) {
-    ProviderUtils.unscheduleAndDeregisterAgents(
-        Collections.singleton(credentials.getName()), catsModule);
+    // TODO(nimak) - ensure that unscheduling does what is exptected in removing the right agents
+    // TODO - this is to be tested against the old behavior
+    unscheduleAgents(credentials);
     scheduleAgents(credentials);
     synchronizeReservationReportCachingAgentAccounts(credentials, true);
   }
 
   @Override
   public void credentialsDeleted(NetflixAmazonCredentials credentials) {
-    ProviderUtils.unscheduleAndDeregisterAgents(
-        Collections.singleton(credentials.getName()), catsModule);
+    // TODO(nimak) - ensure that unscheduling does what is exptected in removing the right agents
+    // TODO - this is to be tested against the old behavior
+    unscheduleAgents(credentials);
     synchronizeReservationReportCachingAgentAccounts(credentials, false);
+  }
+
+  private void unscheduleAgents(NetflixAmazonCredentials credentials) {
+    awsInfrastructureProvider.removeAgentsForAccounts(Collections.singleton(credentials.getName()));
+    awsCleanupProvider.removeAgentsForAccounts(Collections.singleton(credentials.getName()));
+    awsProvider.removeAgentsForAccounts(Collections.singleton(credentials.getName()));
   }
 
   private void scheduleAgents(NetflixAmazonCredentials credentials) {
@@ -119,11 +126,8 @@ public class AmazonCredentialsLifecycleHandler
             registry,
             eddaTimeoutConfig,
             this.awsInfraRegions);
-    if (awsInfrastructureProvider.getAgentScheduler() != null) {
-      ProviderUtils.rescheduleAgents(awsInfrastructureProvider, result.agents);
-    }
-    awsInfrastructureProvider.getAgents().addAll(result.agents);
-    this.awsInfraRegions.addAll(result.regionsToAdd);
+    awsInfrastructureProvider.addAgents(result.getAgents());
+    this.awsInfraRegions.addAll(result.getRegionsToAdd());
   }
 
   private void scheduleAWSProviderAgents(NetflixAmazonCredentials credentials) {
@@ -145,11 +149,9 @@ public class AmazonCredentialsLifecycleHandler
             ctx,
             amazonS3DataProvider,
             publicRegions);
-    if (awsProvider.getAgentScheduler() != null) {
-      ProviderUtils.rescheduleAgents(awsProvider, buildResult.agents);
-    }
-    awsProvider.getAgents().addAll(buildResult.agents);
-    this.publicRegions.addAll(buildResult.regionsToAdd);
+
+    awsProvider.addAgents(buildResult.getAgents());
+    this.publicRegions.addAll(buildResult.getRegionsToAdd());
     awsProvider.synchronizeHealthAgents();
   }
 
@@ -162,10 +164,8 @@ public class AmazonCredentialsLifecycleHandler
             awsCleanupProvider,
             deployDefaults,
             awsConfigurationProperties);
-    if (awsCleanupProvider.getAgentScheduler() != null) {
-      ProviderUtils.rescheduleAgents(awsCleanupProvider, newlyAddedAgents);
-    }
-    awsCleanupProvider.getAgents().addAll(newlyAddedAgents);
+
+    awsCleanupProvider.addAgents(newlyAddedAgents);
   }
 
   // This needs to be moved else where.
