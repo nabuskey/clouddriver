@@ -16,14 +16,13 @@
 
 package com.netflix.spinnaker.clouddriver.ecs.security;
 
-import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsConfig;
 import com.netflix.spinnaker.credentials.definition.CredentialsDefinition;
 import java.util.List;
 import lombok.Data;
 
 @Data
-public class ECSCredentialsConfig extends CredentialsConfig {
-  List<ECSAccount> ecsAccounts;
+public class ECSCredentialsConfig {
+  List<ECSAccount> accounts;
 
   @Data
   public static class ECSAccount implements CredentialsDefinition {

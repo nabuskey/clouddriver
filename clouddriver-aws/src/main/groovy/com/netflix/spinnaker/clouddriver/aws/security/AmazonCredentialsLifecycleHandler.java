@@ -57,26 +57,26 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AmazonCredentialsLifecycleHandler
     implements CredentialsLifecycleHandler<NetflixAmazonCredentials> {
-  protected final AwsCleanupProvider awsCleanupProvider;
-  protected final AwsInfrastructureProvider awsInfrastructureProvider;
-  protected final AwsProvider awsProvider;
-  protected final AmazonCloudProvider amazonCloudProvider;
-  protected final AmazonClientProvider amazonClientProvider;
-  protected final AmazonS3DataProvider amazonS3DataProvider;
-  protected final CatsModule catsModule;
+  private final AwsCleanupProvider awsCleanupProvider;
+  private final AwsInfrastructureProvider awsInfrastructureProvider;
+  private final AwsProvider awsProvider;
+  private final AmazonCloudProvider amazonCloudProvider;
+  private final AmazonClientProvider amazonClientProvider;
+  private final AmazonS3DataProvider amazonS3DataProvider;
+  private final CatsModule catsModule;
 
-  protected final AwsConfigurationProperties awsConfigurationProperties;
-  protected final ObjectMapper objectMapper;
-  protected final @Qualifier("amazonObjectMapper") ObjectMapper amazonObjectMapper;
-  protected final EddaApiFactory eddaApiFactory;
-  protected final ApplicationContext ctx;
-  protected final Registry registry;
-  protected final Optional<ExecutorService> reservationReportPool;
-  protected final Optional<Collection<AgentProvider>> agentProviders;
-  protected final EddaTimeoutConfig eddaTimeoutConfig;
-  protected final DynamicConfigService dynamicConfigService;
-  protected final DeployDefaults deployDefaults;
-  protected final CredentialsRepository<NetflixAmazonCredentials>
+  private final AwsConfigurationProperties awsConfigurationProperties;
+  private final ObjectMapper objectMapper;
+  private final @Qualifier("amazonObjectMapper") ObjectMapper amazonObjectMapper;
+  private final EddaApiFactory eddaApiFactory;
+  private final ApplicationContext ctx;
+  private final Registry registry;
+  private final Optional<ExecutorService> reservationReportPool;
+  private final Optional<Collection<AgentProvider>> agentProviders;
+  private final EddaTimeoutConfig eddaTimeoutConfig;
+  private final DynamicConfigService dynamicConfigService;
+  private final DeployDefaults deployDefaults;
+  private final CredentialsRepository<NetflixAmazonCredentials>
       accountCredentialsRepository; // Circular dependency.
   private Set<String> publicRegions = new HashSet<>();
   private Set<String> awsInfraRegions = new HashSet<>();

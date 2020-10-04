@@ -17,54 +17,45 @@
 
 package com.netflix.spinnaker.clouddriver.ecs.security;
 
+import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAssumeRoleAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsConfig;
+import com.netflix.spinnaker.clouddriver.ecs.provider.EcsProvider;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
+import com.netflix.spinnaker.credentials.CompositeCredentialsRepository;
 import com.netflix.spinnaker.credentials.definition.CredentialsParser;
+import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-// public class ECSCredentialsParser<T extends ECSCredentialsConfig.Account, U extends
-// NetflixECSCredentials, V extends NetflixAmazonCredentials>
-
+@AllArgsConstructor
 public class ECSCredentialsParser<T extends NetflixAmazonCredentials>
     implements CredentialsParser<ECSCredentialsConfig.ECSAccount, NetflixECSCredentials> {
 
-  private final AccountCredentialsProvider accountCredentialsProvider;
-  private final CredentialsParser<CredentialsConfig.Account, NetflixAmazonCredentials>
-      credentialsLoader;
+  private CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository;
+  private CredentialsParser<CredentialsConfig.Account, NetflixAmazonCredentials> parser;
 
-  public ECSCredentialsParser(
-      AccountCredentialsProvider accountCredentialsProvider,
-      CredentialsParser<CredentialsConfig.Account, NetflixAmazonCredentials> credentialsLoader) {
-    this.accountCredentialsProvider = accountCredentialsProvider;
-    this.credentialsLoader = credentialsLoader;
-  }
-
-  @Nullable
   @Override
   public NetflixECSCredentials parse(ECSCredentialsConfig.@NotNull ECSAccount credentials) {
-    for (AccountCredentials accountCredentials : accountCredentialsProvider.getAll()) {
-      if (accountCredentials instanceof NetflixAmazonCredentials
-          && credentials.getAwsAccount().equals(accountCredentials.getName())) {
-
-        NetflixAmazonCredentials netflixAmazonCredentials =
-            (NetflixAmazonCredentials) accountCredentials;
-        CredentialsConfig.Account account =
-            EcsAccountBuilder.build(netflixAmazonCredentials, credentials.getName(), "ecs");
-
-        try {
-          return new NetflixAssumeRoleEcsCredentials(
-              (NetflixAssumeRoleAmazonCredentials) credentialsLoader.parse(account),
-              credentials.getName());
-        } catch (Throwable throwable) {
-          throwable.printStackTrace();
-          return null;
-        }
-      }
+    NetflixAmazonCredentials netflixAmazonCredentials;
+    try {
+      netflixAmazonCredentials =
+          (NetflixAmazonCredentials)
+              compositeCredentialsRepository.getCredentials(
+                  credentials.getAwsAccount(), AmazonCloudProvider.ID);
+    } catch (Throwable throwable) {
+      throwable.printStackTrace();
+      return null;
     }
-    return null;
+
+    CredentialsConfig.Account account =
+        EcsAccountBuilder.build(netflixAmazonCredentials, credentials.getName(), EcsProvider.NAME);
+    try {
+      return new NetflixAssumeRoleEcsCredentials(
+          (NetflixAssumeRoleAmazonCredentials) parser.parse(account), credentials.getName());
+    } catch (Throwable throwable) {
+      throwable.printStackTrace();
+      return null;
+    }
   }
 }

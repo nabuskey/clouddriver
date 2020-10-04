@@ -22,11 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.netflix.awsobjectmapper.AmazonObjectMapperConfigurer
 import com.netflix.spectator.api.Registry
 import com.netflix.spinnaker.cats.agent.Agent
-import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider
 import com.netflix.spinnaker.clouddriver.aws.AwsConfigurationProperties
-import com.netflix.spinnaker.clouddriver.aws.agent.CleanupAlarmsAgent
-import com.netflix.spinnaker.clouddriver.aws.agent.CleanupDetachedInstancesAgent
-import com.netflix.spinnaker.clouddriver.aws.agent.ReconcileClassicLinkSecurityGroupsAgent
 import com.netflix.spinnaker.clouddriver.aws.deploy.BlockDeviceConfig
 import com.netflix.spinnaker.clouddriver.aws.deploy.handlers.BasicAmazonDeployHandler
 import com.netflix.spinnaker.clouddriver.aws.deploy.ops.securitygroup.SecurityGroupLookupFactory
@@ -49,7 +45,6 @@ import com.netflix.spinnaker.clouddriver.core.limits.ServiceLimitConfiguration
 import com.netflix.spinnaker.clouddriver.event.SpinnakerEvent
 import com.netflix.spinnaker.clouddriver.saga.config.SagaAutoConfiguration
 import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository
-import com.netflix.spinnaker.clouddriver.security.ProviderUtils
 import com.netflix.spinnaker.credentials.CredentialsRepository
 import com.netflix.spinnaker.kork.aws.AwsComponents
 import com.netflix.spinnaker.kork.aws.bastion.BastionConfig
@@ -185,14 +180,16 @@ class AwsConfiguration {
   }
 
   @Bean
-  @DependsOn('amazonCredentialsLoader')
-  BasicAmazonDeployHandler basicAmazonDeployHandler(RegionScopedProviderFactory regionScopedProviderFactory,
-                                                    CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
-                                                    DeployDefaults deployDefaults,
-                                                    ScalingPolicyCopier scalingPolicyCopier,
-                                                    BlockDeviceConfig blockDeviceConfig,
-                                                    DynamicConfigService dynamicConfigService,
-                                                    AmazonServerGroupProvider amazonServerGroupProvider) {
+  @DependsOn('amazonCredentialsRepository')
+  BasicAmazonDeployHandler basicAmazonDeployHandler(
+    RegionScopedProviderFactory regionScopedProviderFactory,
+    CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
+    DeployDefaults deployDefaults,
+    ScalingPolicyCopier scalingPolicyCopier,
+    BlockDeviceConfig blockDeviceConfig,
+    DynamicConfigService dynamicConfigService,
+    AmazonServerGroupProvider amazonServerGroupProvider
+  ) {
     new BasicAmazonDeployHandler(
       regionScopedProviderFactory,
       accountCredentialsRepository,
@@ -211,18 +208,16 @@ class AwsConfiguration {
   }
 
   @Bean
-  @DependsOn('amazonCredentialsLoader')
-  AwsCleanupProvider awsOperationProvider(AwsConfigurationProperties awsConfigurationProperties,
-                                          AmazonClientProvider amazonClientProvider,
-                                          AccountCredentialsRepository accountCredentialsRepository,
-                                          DeployDefaults deployDefaults) {
+  AwsCleanupProvider awsOperationProvider() {
     return new AwsCleanupProvider(Collections.newSetFromMap(new ConcurrentHashMap<Agent, Boolean>()))
   }
 
   @Bean
-  @DependsOn('amazonCredentialsLoader')
-  SecurityGroupLookupFactory securityGroupLookup(AmazonClientProvider amazonClientProvider,
-                                                 CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository) {
+  @DependsOn('amazonCredentialsRepository')
+  SecurityGroupLookupFactory securityGroupLookup(
+    AmazonClientProvider amazonClientProvider,
+    CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository
+  ) {
     new SecurityGroupLookupFactory(amazonClientProvider, accountCredentialsRepository)
   }
 
