@@ -72,6 +72,7 @@ class AmazonCredentialsInitializer {
   }
 
   @Bean
+  @Primary
   @ConditionalOnMissingBean(
     value = NetflixAmazonCredentials.class,
     parameterizedContainer = CredentialsRepository.class
@@ -80,17 +81,6 @@ class AmazonCredentialsInitializer {
     @Lazy CredentialsLifecycleHandler<NetflixAmazonCredentials> eventHandler
   ) {
     return new MapBackedCredentialsRepository<NetflixAmazonCredentials>(AmazonCloudProvider.ID, eventHandler)
-  }
-
-  @Bean
-  @ConditionalOnMissingBean(
-    value = NetflixAmazonCredentials.class,
-    parameterizedContainer = AmazonCredentialProvider.class
-  )
-  AmazonCredentialProvider<NetflixAmazonCredentials>  amazonCredentialProvider(
-    CredentialsRepository<NetflixAmazonCredentials> amazonCredentialsRepository
-  ) {
-    return new AmazonCredentialProvider<>(amazonCredentialsRepository)
   }
 
   @Bean

@@ -36,12 +36,18 @@ import com.netflix.spectator.api.Id;
 import com.netflix.spectator.api.Registry;
 import com.netflix.spinnaker.clouddriver.aws.deploy.ops.discovery.AwsEurekaSupport;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials.LifecycleHook;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.eureka.api.Eureka;
 import com.netflix.spinnaker.clouddriver.eureka.deploy.ops.AbstractEurekaSupport.DiscoveryStatus;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
+import com.netflix.spinnaker.credentials.CredentialsRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import retrofit.RetrofitError;
+
+import javax.inject.Provider;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
@@ -52,11 +58,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.inject.Provider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import retrofit.RetrofitError;
 
 public class InstanceTerminationLifecycleWorker implements Runnable {
 
@@ -69,7 +70,7 @@ public class InstanceTerminationLifecycleWorker implements Runnable {
 
   ObjectMapper objectMapper;
   AmazonClientProvider amazonClientProvider;
-  AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider;
+  CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider;
   InstanceTerminationConfigurationProperties properties;
   Provider<AwsEurekaSupport> discoverySupport;
   Registry registry;
@@ -82,7 +83,7 @@ public class InstanceTerminationLifecycleWorker implements Runnable {
   public InstanceTerminationLifecycleWorker(
       ObjectMapper objectMapper,
       AmazonClientProvider amazonClientProvider,
-      AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
+      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider,
       InstanceTerminationConfigurationProperties properties,
       Provider<AwsEurekaSupport> discoverySupport,
       Registry registry) {

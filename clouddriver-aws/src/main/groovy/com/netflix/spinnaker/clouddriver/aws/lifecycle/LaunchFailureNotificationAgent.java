@@ -35,11 +35,14 @@ import com.netflix.spinnaker.cats.agent.RunnableAgent;
 import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.cache.CustomScheduledAgent;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
 import com.netflix.spinnaker.clouddriver.tags.EntityTagger;
+import com.netflix.spinnaker.credentials.CredentialsRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -48,8 +51,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An Agent that subscribes to a particular SQS queue and tags any server groups that had launch
@@ -64,7 +65,7 @@ class LaunchFailureNotificationAgent implements RunnableAgent, CustomScheduledAg
 
   private final ObjectMapper objectMapper;
   private final AmazonClientProvider amazonClientProvider;
-  private final AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider;
+  private final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider;
   private final LaunchFailureConfigurationProperties properties;
   private final EntityTagger serverGroupTagger;
 
@@ -77,7 +78,7 @@ class LaunchFailureNotificationAgent implements RunnableAgent, CustomScheduledAg
   LaunchFailureNotificationAgent(
       ObjectMapper objectMapper,
       AmazonClientProvider amazonClientProvider,
-      AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
+      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider,
       LaunchFailureConfigurationProperties properties,
       EntityTagger serverGroupTagger) {
     this.objectMapper = objectMapper;
@@ -119,7 +120,6 @@ class LaunchFailureNotificationAgent implements RunnableAgent, CustomScheduledAg
   public void run() {
     List<String> allAccountIds =
         accountCredentialsProvider.getAll().stream()
-            .filter(c -> c instanceof NetflixAmazonCredentials)
             .map(AccountCredentials::getAccountId)
             .collect(Collectors.toList());
 

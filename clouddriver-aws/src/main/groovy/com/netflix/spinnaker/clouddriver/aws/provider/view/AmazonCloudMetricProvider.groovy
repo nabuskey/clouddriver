@@ -22,9 +22,9 @@ import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider
 import com.netflix.spinnaker.clouddriver.aws.model.AmazonMetricDescriptor
 import com.netflix.spinnaker.clouddriver.aws.model.AmazonMetricStatistics
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
 import com.netflix.spinnaker.clouddriver.model.CloudMetricProvider
+import com.netflix.spinnaker.credentials.CredentialsRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -32,12 +32,12 @@ import org.springframework.stereotype.Component
 class AmazonCloudMetricProvider implements CloudMetricProvider<AmazonMetricDescriptor> {
 
   final AmazonClientProvider amazonClientProvider
-  final AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider
+  final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
   final AmazonCloudProvider amazonCloudProvider
 
   @Autowired
   AmazonCloudMetricProvider(AmazonClientProvider amazonClientProvider,
-                            AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
+                            CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider,
                             AmazonCloudProvider amazonCloudProvider) {
     this.amazonClientProvider = amazonClientProvider
     this.accountCredentialsProvider = accountCredentialsProvider
@@ -115,7 +115,7 @@ class AmazonCloudMetricProvider implements CloudMetricProvider<AmazonMetricDescr
   }
 
   private AmazonCloudWatch getCloudWatch(String account, String region) {
-    def credentials = accountCredentialsProvider.getCredentials(account)
+    def credentials = accountCredentialsProvider.getOne(account)
     if (!(credentials instanceof NetflixAmazonCredentials)) {
       throw new IllegalArgumentException("Invalid credentials: ${account}:${region}")
     }

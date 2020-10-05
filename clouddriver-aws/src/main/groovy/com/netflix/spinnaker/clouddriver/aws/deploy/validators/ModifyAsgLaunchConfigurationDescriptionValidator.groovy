@@ -19,11 +19,11 @@ package com.netflix.spinnaker.clouddriver.aws.deploy.validators
 import com.netflix.spinnaker.clouddriver.aws.AmazonOperation
 import com.netflix.spinnaker.clouddriver.aws.deploy.description.ModifyAsgLaunchConfigurationDescription
 import com.netflix.spinnaker.clouddriver.aws.model.AmazonBlockDevice
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
 import com.netflix.spinnaker.clouddriver.deploy.ValidationErrors
 import com.netflix.spinnaker.clouddriver.orchestration.AtomicOperations
+import com.netflix.spinnaker.credentials.CredentialsRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component
 @Component("modifyAsgLaunchConfigurationDescriptionValidator")
 class ModifyAsgLaunchConfigurationDescriptionValidator extends AmazonDescriptionValidationSupport<ModifyAsgLaunchConfigurationDescription> {
   @Autowired
-  AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider
+  CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
 
   @Override
   void validate(List priorDescriptions, ModifyAsgLaunchConfigurationDescription description, ValidationErrors errors) {
@@ -41,7 +41,7 @@ class ModifyAsgLaunchConfigurationDescriptionValidator extends AmazonDescription
     if (!description.credentials) {
       errors.rejectValue "credentials", "modifyAsgLaunchConfigurationDescription.credentials.empty"
     } else {
-      def credentials = accountCredentialsProvider.getCredentials(description?.credentials?.name)
+      def credentials = accountCredentialsProvider.getOne(description?.credentials?.name)
       if (!(credentials instanceof AmazonCredentials)) {
         errors.rejectValue("credentials", "modifyAsgLaunchConfigurationDescription.credentials.invalid")
       }

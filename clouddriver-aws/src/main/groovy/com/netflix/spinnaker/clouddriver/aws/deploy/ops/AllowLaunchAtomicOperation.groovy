@@ -23,13 +23,13 @@ import com.netflix.spinnaker.clouddriver.aws.deploy.ResolvedAmiResult
 import com.netflix.spinnaker.clouddriver.aws.deploy.description.AllowLaunchDescription
 import com.netflix.spinnaker.clouddriver.aws.model.AwsResultsRetriever
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
 import com.netflix.spinnaker.clouddriver.data.task.Task
 import com.netflix.spinnaker.clouddriver.data.task.TaskRepository
 import com.netflix.spinnaker.clouddriver.helpers.OperationPoller
 import com.netflix.spinnaker.clouddriver.orchestration.AtomicOperation
+import com.netflix.spinnaker.credentials.CredentialsRepository
 import com.netflix.spinnaker.kork.core.RetrySupport
 import groovy.transform.Canonical
 import org.springframework.beans.factory.annotation.Autowired
@@ -51,14 +51,14 @@ class AllowLaunchAtomicOperation implements AtomicOperation<ResolvedAmiResult> {
   AmazonClientProvider amazonClientProvider
 
   @Autowired
-  AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider
+  CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
 
   @Override
   ResolvedAmiResult operate(List priorOutputs) {
     task.updateStatus BASE_PHASE, "Initializing Allow Launch Operation..."
 
     def sourceCredentials = description.credentials
-    def targetCredentials = accountCredentialsProvider.getCredentials(description.targetAccount) as NetflixAmazonCredentials
+    def targetCredentials = accountCredentialsProvider.getOne(description.targetAccount) as NetflixAmazonCredentials
     def sourceAmazonEC2 = amazonClientProvider.getAmazonEC2(description.credentials, description.region, true)
     def targetAmazonEC2 = amazonClientProvider.getAmazonEC2(targetCredentials, description.region, true)
 
@@ -83,7 +83,7 @@ class AllowLaunchAtomicOperation implements AtomicOperation<ResolvedAmiResult> {
     // Spinnaker, switch to using that for modifying the image
     if (resolvedAmi.ownerId != sourceCredentials.accountId) {
       if (resolvedAmi.getRegion()) {
-        ownerCredentials = accountCredentialsProvider.all.find { accountCredentials ->
+        ownerCredentials = accountCredentialsProvider.getAll().find { accountCredentials ->
           accountCredentials instanceof NetflixAmazonCredentials &&
             ((AmazonCredentials) accountCredentials).accountId == resolvedAmi.ownerId
         } as NetflixAmazonCredentials

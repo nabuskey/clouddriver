@@ -20,20 +20,21 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.netflix.spectator.api.Registry;
 import com.netflix.spinnaker.clouddriver.aws.deploy.ops.discovery.AwsEurekaSupport;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.regex.Pattern;
-import javax.annotation.PostConstruct;
-import javax.inject.Provider;
+import com.netflix.spinnaker.credentials.CredentialsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Provider;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.regex.Pattern;
 
 @Component
 @ConditionalOnExpression(
@@ -47,7 +48,7 @@ public class InstanceTerminationLifecycleWorkerProvider {
 
   private final ObjectMapper objectMapper;
   private final AmazonClientProvider amazonClientProvider;
-  private final AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider;
+  private final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider;
   private final InstanceTerminationConfigurationProperties properties;
   private final Provider<AwsEurekaSupport> discoverySupport;
   private final Registry registry;
@@ -56,7 +57,7 @@ public class InstanceTerminationLifecycleWorkerProvider {
   InstanceTerminationLifecycleWorkerProvider(
       @Qualifier("amazonObjectMapper") ObjectMapper objectMapper,
       AmazonClientProvider amazonClientProvider,
-      AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
+      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider,
       InstanceTerminationConfigurationProperties properties,
       Provider<AwsEurekaSupport> discoverySupport,
       Registry registry) {
@@ -72,7 +73,7 @@ public class InstanceTerminationLifecycleWorkerProvider {
   public void start() {
     NetflixAmazonCredentials credentials =
         (NetflixAmazonCredentials)
-            accountCredentialsProvider.getCredentials(properties.getAccountName());
+            accountCredentialsProvider.getOne(properties.getAccountName());
     ExecutorService executorService =
         Executors.newFixedThreadPool(
             credentials.getRegions().size(),

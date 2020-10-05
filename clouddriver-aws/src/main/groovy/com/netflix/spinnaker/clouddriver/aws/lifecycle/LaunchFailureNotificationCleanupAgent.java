@@ -26,19 +26,20 @@ import com.netflix.spinnaker.cats.agent.RunnableAgent;
 import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.cache.CustomScheduledAgent;
 import com.netflix.spinnaker.clouddriver.model.EntityTags;
 import com.netflix.spinnaker.clouddriver.tags.EntityTagger;
+import com.netflix.spinnaker.credentials.CredentialsRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class LaunchFailureNotificationCleanupAgent implements RunnableAgent, CustomScheduledAgent {
   private static final Logger log = LoggerFactory.getLogger(LaunchFailureNotificationAgent.class);
@@ -47,12 +48,12 @@ public class LaunchFailureNotificationCleanupAgent implements RunnableAgent, Cus
   private static final int MAX_RESULTS = 10000;
 
   private final AmazonClientProvider amazonClientProvider;
-  private final AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider;
+  private final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider;
   private final EntityTagger serverGroupTagger;
 
   LaunchFailureNotificationCleanupAgent(
       AmazonClientProvider amazonClientProvider,
-      AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
+      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider,
       EntityTagger serverGroupTagger) {
     this.amazonClientProvider = amazonClientProvider;
     this.accountCredentialsProvider = accountCredentialsProvider;
@@ -93,8 +94,7 @@ public class LaunchFailureNotificationCleanupAgent implements RunnableAgent, Cus
         entityTags -> {
           EntityTags.EntityRef entityRef = entityTags.getEntityRef();
           Optional<NetflixAmazonCredentials> credentials =
-              Optional.ofNullable(accountCredentialsProvider.getCredentials(entityRef.getAccount()))
-                  .filter((c) -> c instanceof NetflixAmazonCredentials)
+              Optional.ofNullable(accountCredentialsProvider.getOne(entityRef.getAccount()))
                   .map(NetflixAmazonCredentials.class::cast);
 
           if (!credentials.isPresent()) {

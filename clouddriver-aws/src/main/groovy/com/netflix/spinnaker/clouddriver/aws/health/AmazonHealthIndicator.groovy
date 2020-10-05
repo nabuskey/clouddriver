@@ -21,8 +21,8 @@ import com.amazonaws.AmazonServiceException
 import com.amazonaws.services.ec2.AmazonEC2
 import com.netflix.spectator.api.Registry
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
+import com.netflix.spinnaker.credentials.CredentialsRepository
 import groovy.transform.InheritConstructors
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -42,7 +42,7 @@ class AmazonHealthIndicator implements HealthIndicator {
 
   private static final Logger LOG = LoggerFactory.getLogger(AmazonHealthIndicator)
 
-  private final AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider
+  private final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
   private final AmazonClientProvider amazonClientProvider
 
   private final AtomicReference<Exception> lastException = new AtomicReference<>(null)
@@ -51,7 +51,7 @@ class AmazonHealthIndicator implements HealthIndicator {
   private final AtomicLong errors;
 
   @Autowired
-  AmazonHealthIndicator(AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
+  AmazonHealthIndicator(CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider,
                         AmazonClientProvider amazonClientProvider,
                         Registry registry) {
     this.accountCredentialsProvider = accountCredentialsProvider
@@ -78,7 +78,7 @@ class AmazonHealthIndicator implements HealthIndicator {
   @Scheduled(fixedDelay = 120000L)
   void checkHealth() {
     try {
-      Set<NetflixAmazonCredentials> amazonCredentials = accountCredentialsProvider.all.findAll {
+      Set<NetflixAmazonCredentials> amazonCredentials = accountCredentialsProvider.getAll().findAll {
         it instanceof NetflixAmazonCredentials
       } as Set<NetflixAmazonCredentials>
       for (NetflixAmazonCredentials credentials in amazonCredentials) {

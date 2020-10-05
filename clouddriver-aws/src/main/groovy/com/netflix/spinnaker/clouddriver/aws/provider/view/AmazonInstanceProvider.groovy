@@ -23,10 +23,10 @@ import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider
 import com.netflix.spinnaker.clouddriver.aws.data.Keys
 import com.netflix.spinnaker.clouddriver.aws.model.AmazonInstance
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
 import com.netflix.spinnaker.clouddriver.core.provider.agent.ExternalHealthProvider
 import com.netflix.spinnaker.clouddriver.model.InstanceProvider
+import com.netflix.spinnaker.credentials.CredentialsRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -50,7 +50,7 @@ class AmazonInstanceProvider implements InstanceProvider<AmazonInstance, String>
   AmazonClientProvider amazonClientProvider
 
   @Autowired
-  AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider
+  CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
 
   @Override
   AmazonInstance getInstance(String account, String region, String id) {
@@ -84,7 +84,7 @@ class AmazonInstanceProvider implements InstanceProvider<AmazonInstance, String>
   }
 
   String getConsoleOutput(String account, String region, String id) {
-    def credentials = accountCredentialsProvider.getCredentials(account)
+    def credentials = accountCredentialsProvider.getOne(account)
     if (!(credentials instanceof NetflixAmazonCredentials)) {
       throw new IllegalArgumentException("Invalid credentials: ${account}:${region}")
     }

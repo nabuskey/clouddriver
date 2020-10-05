@@ -21,9 +21,10 @@ import com.netflix.spinnaker.cats.agent.Agent;
 import com.netflix.spinnaker.cats.agent.AgentProvider;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.tags.EntityTagger;
+import com.netflix.spinnaker.credentials.CredentialsRepository;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -35,14 +36,14 @@ public class LaunchFailureNotificationAgentProvider implements AgentProvider {
 
   private final ObjectMapper objectMapper;
   private final AmazonClientProvider amazonClientProvider;
-  private final AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider;
+  private final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider;
   private final LaunchFailureConfigurationProperties properties;
   private final EntityTagger entityTagger;
 
   LaunchFailureNotificationAgentProvider(
       ObjectMapper objectMapper,
       AmazonClientProvider amazonClientProvider,
-      AmazonCredentialProvider<NetflixAmazonCredentials> accountCredentialsProvider,
+      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider,
       LaunchFailureConfigurationProperties properties,
       EntityTagger entityTagger) {
     this.objectMapper = objectMapper;
@@ -61,7 +62,7 @@ public class LaunchFailureNotificationAgentProvider implements AgentProvider {
   public Collection<Agent> agents() {
     NetflixAmazonCredentials credentials =
         (NetflixAmazonCredentials)
-            accountCredentialsProvider.getCredentials(properties.getAccountName());
+            accountCredentialsProvider.getOne(properties.getAccountName());
 
     // an agent for each region in the specified account
     List<Agent> agents =
