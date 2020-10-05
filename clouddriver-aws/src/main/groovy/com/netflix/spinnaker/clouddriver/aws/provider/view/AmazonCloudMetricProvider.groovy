@@ -32,15 +32,15 @@ import org.springframework.stereotype.Component
 class AmazonCloudMetricProvider implements CloudMetricProvider<AmazonMetricDescriptor> {
 
   final AmazonClientProvider amazonClientProvider
-  final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
+  final CredentialsRepository<NetflixAmazonCredentials> credentialsRepository
   final AmazonCloudProvider amazonCloudProvider
 
   @Autowired
   AmazonCloudMetricProvider(AmazonClientProvider amazonClientProvider,
-                            CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider,
+                            CredentialsRepository<NetflixAmazonCredentials> credentialsRepository,
                             AmazonCloudProvider amazonCloudProvider) {
     this.amazonClientProvider = amazonClientProvider
-    this.accountCredentialsProvider = accountCredentialsProvider
+    this.credentialsRepository = credentialsRepository
     this.amazonCloudProvider = amazonCloudProvider
   }
 
@@ -115,7 +115,7 @@ class AmazonCloudMetricProvider implements CloudMetricProvider<AmazonMetricDescr
   }
 
   private AmazonCloudWatch getCloudWatch(String account, String region) {
-    def credentials = accountCredentialsProvider.getOne(account)
+    def credentials = credentialsRepository.getOne(account)
     if (!(credentials instanceof NetflixAmazonCredentials)) {
       throw new IllegalArgumentException("Invalid credentials: ${account}:${region}")
     }

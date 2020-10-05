@@ -39,10 +39,10 @@ class LifecycleSubscriberConfiguration {
   LaunchFailureNotificationAgentProvider launchFailureNotificationAgentProvider(
       @Qualifier("amazonObjectMapper") ObjectMapper objectMapper,
       AmazonClientProvider amazonClientProvider,
-      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider,
+      CredentialsRepository<NetflixAmazonCredentials> credentialsRepository,
       LaunchFailureConfigurationProperties properties,
       EntityTagger entityTagger) {
     return new LaunchFailureNotificationAgentProvider(
-        objectMapper, amazonClientProvider, accountCredentialsProvider, properties, entityTagger);
+        objectMapper, amazonClientProvider, credentialsRepository, properties, entityTagger);
   }
 }

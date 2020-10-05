@@ -42,7 +42,7 @@ class AmazonHealthIndicator implements HealthIndicator {
 
   private static final Logger LOG = LoggerFactory.getLogger(AmazonHealthIndicator)
 
-  private final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
+  private final CredentialsRepository<NetflixAmazonCredentials> credentialsRepository
   private final AmazonClientProvider amazonClientProvider
 
   private final AtomicReference<Exception> lastException = new AtomicReference<>(null)
@@ -51,10 +51,10 @@ class AmazonHealthIndicator implements HealthIndicator {
   private final AtomicLong errors;
 
   @Autowired
-  AmazonHealthIndicator(CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider,
+  AmazonHealthIndicator(CredentialsRepository<NetflixAmazonCredentials> credentialsRepository,
                         AmazonClientProvider amazonClientProvider,
                         Registry registry) {
-    this.accountCredentialsProvider = accountCredentialsProvider
+    this.credentialsRepository = credentialsRepository
     this.amazonClientProvider = amazonClientProvider
 
     this.errors = registry.gauge("health.amazon.errors", new AtomicLong(0))
@@ -78,7 +78,7 @@ class AmazonHealthIndicator implements HealthIndicator {
   @Scheduled(fixedDelay = 120000L)
   void checkHealth() {
     try {
-      Set<NetflixAmazonCredentials> amazonCredentials = accountCredentialsProvider.getAll().findAll {
+      Set<NetflixAmazonCredentials> amazonCredentials = credentialsRepository.getAll().findAll {
         it instanceof NetflixAmazonCredentials
       } as Set<NetflixAmazonCredentials>
       for (NetflixAmazonCredentials credentials in amazonCredentials) {

@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component
 @Component("allowLaunchDescriptionValidator")
 class AllowLaunchDescriptionValidator extends DescriptionValidator<AllowLaunchDescription> {
   @Autowired
-  CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
+  CredentialsRepository<NetflixAmazonCredentials> credentialsRepository
 
   @Override
   void validate(List priorDescriptions, AllowLaunchDescription description, ValidationErrors errors) {
@@ -39,7 +39,7 @@ class AllowLaunchDescriptionValidator extends DescriptionValidator<AllowLaunchDe
     }
     if (!description.targetAccount) {
       errors.rejectValue("targetAccount", "allowLaunchDescription.targetAccount.empty")
-    } else if (!accountCredentialsProvider.getAll().collect { it.name }.contains(description.targetAccount)) {
+    } else if (!credentialsRepository.getAll().collect { it.name }.contains(description.targetAccount)) {
       errors.rejectValue("targetAccount", "allowLaunchDescription.targetAccount.not.configured")
     }
   }

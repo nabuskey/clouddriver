@@ -46,20 +46,20 @@ import static com.netflix.spinnaker.clouddriver.aws.cache.Keys.Namespace.SECURIT
 class AmazonSecurityGroupProvider implements SecurityGroupProvider<AmazonSecurityGroup> {
 
   final String cloudProvider = AmazonCloudProvider.ID
-  final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
+  final CredentialsRepository<NetflixAmazonCredentials> credentialsRepository
   final Cache cacheView
   final ObjectMapper objectMapper
   final Set<AmazonCredentials> accounts
 
   @Autowired
-  AmazonSecurityGroupProvider(CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider,
+  AmazonSecurityGroupProvider(CredentialsRepository<NetflixAmazonCredentials> credentialsRepository,
                               Cache cacheView,
                               @Qualifier("amazonObjectMapper") ObjectMapper objectMapper) {
-    this.accountCredentialsProvider = accountCredentialsProvider
+    this.credentialsRepository = credentialsRepository
     this.cacheView = cacheView
     this.objectMapper = objectMapper
 
-    final allAmazonCredentials = (Set<AmazonCredentials>) accountCredentialsProvider.getAll().findAll {
+    final allAmazonCredentials = (Set<AmazonCredentials>) credentialsRepository.getAll().findAll {
       it instanceof AmazonCredentials
     }
     accounts = ImmutableSet.copyOf(allAmazonCredentials)

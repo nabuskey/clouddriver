@@ -24,7 +24,6 @@ import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.tags.EntityTagger;
 import com.netflix.spinnaker.credentials.CredentialsRepository;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -36,19 +35,19 @@ public class LaunchFailureNotificationAgentProvider implements AgentProvider {
 
   private final ObjectMapper objectMapper;
   private final AmazonClientProvider amazonClientProvider;
-  private final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider;
+  private final CredentialsRepository<NetflixAmazonCredentials> credentialsRepository;
   private final LaunchFailureConfigurationProperties properties;
   private final EntityTagger entityTagger;
 
   LaunchFailureNotificationAgentProvider(
       ObjectMapper objectMapper,
       AmazonClientProvider amazonClientProvider,
-      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider,
+      CredentialsRepository<NetflixAmazonCredentials> credentialsRepository,
       LaunchFailureConfigurationProperties properties,
       EntityTagger entityTagger) {
     this.objectMapper = objectMapper;
     this.amazonClientProvider = amazonClientProvider;
-    this.accountCredentialsProvider = accountCredentialsProvider;
+    this.credentialsRepository = credentialsRepository;
     this.properties = properties;
     this.entityTagger = entityTagger;
   }
@@ -61,8 +60,7 @@ public class LaunchFailureNotificationAgentProvider implements AgentProvider {
   @Override
   public Collection<Agent> agents() {
     NetflixAmazonCredentials credentials =
-        (NetflixAmazonCredentials)
-            accountCredentialsProvider.getOne(properties.getAccountName());
+        (NetflixAmazonCredentials) credentialsRepository.getOne(properties.getAccountName());
 
     // an agent for each region in the specified account
     List<Agent> agents =
@@ -72,7 +70,7 @@ public class LaunchFailureNotificationAgentProvider implements AgentProvider {
                     new LaunchFailureNotificationAgent(
                         objectMapper,
                         amazonClientProvider,
-                        accountCredentialsProvider,
+                        credentialsRepository,
                         new LaunchFailureConfigurationProperties(
                             properties.getAccountName(),
                             properties
@@ -94,7 +92,7 @@ public class LaunchFailureNotificationAgentProvider implements AgentProvider {
     // an agent that will cleanup stale notifications across all accounts + region
     agents.add(
         new LaunchFailureNotificationCleanupAgent(
-            amazonClientProvider, accountCredentialsProvider, entityTagger));
+            amazonClientProvider, credentialsRepository, entityTagger));
 
     return agents;
   }

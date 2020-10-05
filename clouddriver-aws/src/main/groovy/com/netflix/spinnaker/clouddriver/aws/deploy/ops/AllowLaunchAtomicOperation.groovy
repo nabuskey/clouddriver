@@ -51,14 +51,14 @@ class AllowLaunchAtomicOperation implements AtomicOperation<ResolvedAmiResult> {
   AmazonClientProvider amazonClientProvider
 
   @Autowired
-  CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
+  CredentialsRepository<NetflixAmazonCredentials> credentialsRepository
 
   @Override
   ResolvedAmiResult operate(List priorOutputs) {
     task.updateStatus BASE_PHASE, "Initializing Allow Launch Operation..."
 
     def sourceCredentials = description.credentials
-    def targetCredentials = accountCredentialsProvider.getOne(description.targetAccount) as NetflixAmazonCredentials
+    def targetCredentials = credentialsRepository.getOne(description.targetAccount) as NetflixAmazonCredentials
     def sourceAmazonEC2 = amazonClientProvider.getAmazonEC2(description.credentials, description.region, true)
     def targetAmazonEC2 = amazonClientProvider.getAmazonEC2(targetCredentials, description.region, true)
 
@@ -83,7 +83,7 @@ class AllowLaunchAtomicOperation implements AtomicOperation<ResolvedAmiResult> {
     // Spinnaker, switch to using that for modifying the image
     if (resolvedAmi.ownerId != sourceCredentials.accountId) {
       if (resolvedAmi.getRegion()) {
-        ownerCredentials = accountCredentialsProvider.getAll().find { accountCredentials ->
+        ownerCredentials = credentialsRepository.getAll().find { accountCredentials ->
           accountCredentials instanceof NetflixAmazonCredentials &&
             ((AmazonCredentials) accountCredentials).accountId == resolvedAmi.ownerId
         } as NetflixAmazonCredentials

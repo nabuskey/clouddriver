@@ -40,7 +40,7 @@ class AmazonClusterControllerSpec extends Specification {
     def provider = Stub(AmazonClientProvider)
     provider.getAutoScaling(creds, region) >> autoScaling
     controller.amazonClientProvider = provider
-    controller.accountCredentialsProvider = credsProvider
+    controller.credentialsRepository = credsProvider
 
     when:
     def result = controller.getScalingActivities(account, asgName, region)

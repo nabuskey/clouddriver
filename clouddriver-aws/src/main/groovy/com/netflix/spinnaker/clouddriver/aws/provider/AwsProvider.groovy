@@ -16,8 +16,7 @@
 
 package com.netflix.spinnaker.clouddriver.aws.provider
 
-import com.netflix.spinnaker.cats.agent.Agent
-import com.netflix.spinnaker.cats.agent.AgentSchedulerAware
+
 import com.netflix.spinnaker.cats.cache.Cache
 import com.netflix.spinnaker.clouddriver.aws.data.Keys
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
@@ -36,7 +35,7 @@ class AwsProvider extends BaseProvider implements SearchableProvider, EurekaAwar
 
   final KeyParser keyParser = new Keys()
 
-  final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository
+  final CredentialsRepository<NetflixAmazonCredentials> credentialsRepository
 
   final Set<String> defaultCaches = [
     LOAD_BALANCERS.ns,
@@ -58,9 +57,9 @@ class AwsProvider extends BaseProvider implements SearchableProvider, EurekaAwar
 
   private Collection<HealthProvidingCachingAgent> healthAgents
 
-  AwsProvider(CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository) {
+  AwsProvider(CredentialsRepository<NetflixAmazonCredentials> credentialsRepository) {
     super()
-    this.accountCredentialsRepository = accountCredentialsRepository
+    this.credentialsRepository = credentialsRepository
     synchronizeHealthAgents()
   }
 
@@ -131,14 +130,14 @@ class AwsProvider extends BaseProvider implements SearchableProvider, EurekaAwar
 
   private String getCredentialName(String accountId, boolean allowMultipleEurekaPerAccount, String eurekaAccountName) {
     if (allowMultipleEurekaPerAccount) {
-      def credentialName = accountCredentialsRepository.all.find {
+      def credentialName = credentialsRepository.all.find {
         it instanceof NetflixAmazonCredentials && it.accountId == accountId && it.name == eurekaAccountName
       }?.name
       if (credentialName) {
         return credentialName
       }
     }
-    return accountCredentialsRepository.all.find {
+    return credentialsRepository.all.find {
       it instanceof NetflixAmazonCredentials && it.accountId == accountId
     }?.name
   }

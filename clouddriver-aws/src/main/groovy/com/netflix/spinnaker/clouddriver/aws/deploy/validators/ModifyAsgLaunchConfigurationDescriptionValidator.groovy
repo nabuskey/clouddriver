@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component
 @Component("modifyAsgLaunchConfigurationDescriptionValidator")
 class ModifyAsgLaunchConfigurationDescriptionValidator extends AmazonDescriptionValidationSupport<ModifyAsgLaunchConfigurationDescription> {
   @Autowired
-  CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
+  CredentialsRepository<NetflixAmazonCredentials> credentialsRepository
 
   @Override
   void validate(List priorDescriptions, ModifyAsgLaunchConfigurationDescription description, ValidationErrors errors) {
@@ -41,7 +41,7 @@ class ModifyAsgLaunchConfigurationDescriptionValidator extends AmazonDescription
     if (!description.credentials) {
       errors.rejectValue "credentials", "modifyAsgLaunchConfigurationDescription.credentials.empty"
     } else {
-      def credentials = accountCredentialsProvider.getOne(description?.credentials?.name)
+      def credentials = credentialsRepository.getOne(description?.credentials?.name)
       if (!(credentials instanceof AmazonCredentials)) {
         errors.rejectValue("credentials", "modifyAsgLaunchConfigurationDescription.credentials.invalid")
       }

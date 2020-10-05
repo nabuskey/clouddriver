@@ -50,7 +50,7 @@ class AmazonInstanceProvider implements InstanceProvider<AmazonInstance, String>
   AmazonClientProvider amazonClientProvider
 
   @Autowired
-  CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
+  CredentialsRepository<NetflixAmazonCredentials> credentialsRepository
 
   @Override
   AmazonInstance getInstance(String account, String region, String id) {
@@ -84,7 +84,7 @@ class AmazonInstanceProvider implements InstanceProvider<AmazonInstance, String>
   }
 
   String getConsoleOutput(String account, String region, String id) {
-    def credentials = accountCredentialsProvider.getOne(account)
+    def credentials = credentialsRepository.getOne(account)
     if (!(credentials instanceof NetflixAmazonCredentials)) {
       throw new IllegalArgumentException("Invalid credentials: ${account}:${region}")
     }

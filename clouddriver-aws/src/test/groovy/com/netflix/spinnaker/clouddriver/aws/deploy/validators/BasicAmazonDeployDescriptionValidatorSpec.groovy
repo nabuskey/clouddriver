@@ -41,7 +41,7 @@ class BasicAmazonDeployDescriptionValidatorSpec extends Specification {
     def credentialsRepo = new MapBackedAccountCredentialsRepository()
     def credentialsProvider = new DefaultAccountCredentialsProvider(credentialsRepo)
     credentialsRepo.save(ACCOUNT_NAME, amazonCredentials)
-    validator.accountCredentialsProvider = credentialsProvider
+    validator.credentialsRepository = credentialsProvider
   }
 
   void "pass validation with proper description inputs"() {

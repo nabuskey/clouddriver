@@ -57,7 +57,7 @@ class CopyLastAsgAtomicOperation implements AtomicOperation<DeploymentResult> {
   AmazonClientProvider amazonClientProvider
 
   @Autowired
-  CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
+  CredentialsRepository<NetflixAmazonCredentials> credentialsRepository
 
   @Autowired
   RegionScopedProviderFactory regionScopedProviderFactory
@@ -91,7 +91,7 @@ class CopyLastAsgAtomicOperation implements AtomicOperation<DeploymentResult> {
       def sourceAsgCredentials
       if (description.source.account && description.source.region && description.source.asgName) {
         sourceRegion = description.source.region
-        sourceAsgCredentials = accountCredentialsProvider.getOne(description.source.account) as NetflixAmazonCredentials
+        sourceAsgCredentials = credentialsRepository.getOne(description.source.account) as NetflixAmazonCredentials
         def sourceAutoScaling = amazonClientProvider.getAutoScaling(sourceAsgCredentials, sourceRegion, true)
         def request = new DescribeAutoScalingGroupsRequest(autoScalingGroupNames: [description.source.asgName])
         List<AutoScalingGroup> ancestorAsgs = sourceAutoScaling.describeAutoScalingGroups(request).autoScalingGroups

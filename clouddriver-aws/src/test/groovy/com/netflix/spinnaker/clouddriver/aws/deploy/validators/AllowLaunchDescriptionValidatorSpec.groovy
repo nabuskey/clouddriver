@@ -43,7 +43,7 @@ class AllowLaunchDescriptionValidatorSpec extends Specification {
     setup:
     AllowLaunchDescriptionValidator validator = new AllowLaunchDescriptionValidator()
     def credentialsHolder = Mock(AccountCredentialsProvider)
-    validator.accountCredentialsProvider = credentialsHolder
+    validator.credentialsRepository = credentialsHolder
     def description = new AllowLaunchDescription(targetAccount: "foo")
     def errors = Mock(ValidationErrors)
 

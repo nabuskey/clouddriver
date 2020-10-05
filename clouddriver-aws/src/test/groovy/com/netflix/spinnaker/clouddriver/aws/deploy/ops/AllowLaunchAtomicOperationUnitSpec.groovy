@@ -60,7 +60,7 @@ class AllowLaunchAtomicOperationUnitSpec extends Specification {
       getCredentials('target') >> target
     }
     def op = new AllowLaunchAtomicOperation(new AllowLaunchDescription(amiName: 'super-awesome-ami', targetAccount: 'target', credentials: source))
-    op.accountCredentialsProvider = creds
+    op.credentialsRepository = creds
     op.amazonClientProvider = provider
 
     when:
@@ -98,13 +98,13 @@ class AllowLaunchAtomicOperationUnitSpec extends Specification {
     def description = new AllowLaunchDescription(targetAccount: "prod", amiName: "ami-123456", region: "us-west-1", credentials: testCredentials)
     def op = new AllowLaunchAtomicOperation(description)
     op.amazonClientProvider = provider
-    op.accountCredentialsProvider = Mock(AccountCredentialsProvider)
+    op.credentialsRepository = Mock(AccountCredentialsProvider)
 
     when:
     op.operate([])
 
     then:
-    with(op.accountCredentialsProvider){
+    with(op.credentialsRepository){
       1 * getCredentials("prod") >> prodCredentials
     }
     with(provider) {
@@ -129,13 +129,13 @@ class AllowLaunchAtomicOperationUnitSpec extends Specification {
     def description = new AllowLaunchDescription(targetAccount: "prod", amiName: "ami-123456", region: "us-west-1", credentials: testCredentials)
     def op = new AllowLaunchAtomicOperation(description)
     op.amazonClientProvider = provider
-    op.accountCredentialsProvider = Mock(AccountCredentialsProvider)
+    op.credentialsRepository = Mock(AccountCredentialsProvider)
 
     when:
     op.operate([])
 
     then:
-    with(op.accountCredentialsProvider){
+    with(op.credentialsRepository){
       1 * getCredentials("prod") >> prodCredentials
     }
     with(provider) {
@@ -164,13 +164,13 @@ class AllowLaunchAtomicOperationUnitSpec extends Specification {
     def description = new AllowLaunchDescription(targetAccount: "test", amiName: "ami-123456", region: "us-west-1", credentials: testCredentials)
     def op = new AllowLaunchAtomicOperation(description)
     op.amazonClientProvider = provider
-    op.accountCredentialsProvider = Mock(AccountCredentialsProvider)
+    op.credentialsRepository = Mock(AccountCredentialsProvider)
 
     when:
     op.operate([])
 
     then:
-    with(op.accountCredentialsProvider){
+    with(op.credentialsRepository){
       1 * getCredentials("test") >> testCredentials
     }
     with(provider) {
@@ -197,13 +197,13 @@ class AllowLaunchAtomicOperationUnitSpec extends Specification {
     def description = new AllowLaunchDescription(targetAccount: 'target', amiName: 'ami-123456', region: 'us-west-1', credentials: sourceCredentials)
     def op = new AllowLaunchAtomicOperation(description)
     op.amazonClientProvider = Mock(AmazonClientProvider)
-    op.accountCredentialsProvider = Mock(AccountCredentialsProvider)
+    op.credentialsRepository = Mock(AccountCredentialsProvider)
 
     when:
     op.operate([])
 
     then:
-    with(op.accountCredentialsProvider) {
+    with(op.credentialsRepository) {
       1 * getCredentials('target') >> targetCredentials
       1 * getAll() >> [sourceCredentials, targetCredentials, ownerCredentials]
     }
@@ -238,14 +238,14 @@ class AllowLaunchAtomicOperationUnitSpec extends Specification {
     def description = new AllowLaunchDescription(targetAccount: 'target', amiName: 'ami-123456', region: 'us-west-1', credentials: ownerCredentials)
     def op = new AllowLaunchAtomicOperation(description)
     op.amazonClientProvider = Mock(AmazonClientProvider)
-    op.accountCredentialsProvider = Mock(AccountCredentialsProvider)
+    op.credentialsRepository = Mock(AccountCredentialsProvider)
 
     when:
     op.operate([])
 
     then:
 
-    with(op.accountCredentialsProvider) {
+    with(op.credentialsRepository) {
       1 * getCredentials('target') >> targetCredentials
     }
 
@@ -275,13 +275,13 @@ class AllowLaunchAtomicOperationUnitSpec extends Specification {
     def description = new AllowLaunchDescription(targetAccount: 'target', amiName: 'ami-123456', region: 'us-west-2', credentials: sourceCredentials)
     def op = new AllowLaunchAtomicOperation(description)
     op.amazonClientProvider = Mock(AmazonClientProvider)
-    op.accountCredentialsProvider = Mock(AccountCredentialsProvider)
+    op.credentialsRepository = Mock(AccountCredentialsProvider)
 
     when:
     op.operate([])
 
     then:
-    with(op.accountCredentialsProvider) {
+    with(op.credentialsRepository) {
       1 * getCredentials('target') >> targetCredentials
     }
     with(op.amazonClientProvider) {
@@ -317,13 +317,13 @@ class AllowLaunchAtomicOperationUnitSpec extends Specification {
     def description = new AllowLaunchDescription(targetAccount: 'target', amiName: 'ami-123456', region: 'us-west-1', credentials: ownerCredentials)
     def op = new AllowLaunchAtomicOperation(description)
     op.amazonClientProvider = Mock(AmazonClientProvider)
-    op.accountCredentialsProvider = Mock(AccountCredentialsProvider)
+    op.credentialsRepository = Mock(AccountCredentialsProvider)
 
     when:
     op.operate([])
 
     then:
-    with(op.accountCredentialsProvider) {
+    with(op.credentialsRepository) {
       1 * getCredentials('target') >> targetCredentials
     }
 
@@ -359,13 +359,13 @@ class AllowLaunchAtomicOperationUnitSpec extends Specification {
     def description = new AllowLaunchDescription(targetAccount: 'target', amiName: 'ami-123456', region: 'us-west-1', credentials: sourceCredentials)
     def op = new AllowLaunchAtomicOperation(description)
     op.amazonClientProvider = Mock(AmazonClientProvider)
-    op.accountCredentialsProvider = Mock(AccountCredentialsProvider)
+    op.credentialsRepository = Mock(AccountCredentialsProvider)
 
     when:
     op.operate([])
 
     then:
-    with(op.accountCredentialsProvider) {
+    with(op.credentialsRepository) {
       1 * getCredentials('target') >> targetCredentials
       1 * getAll() >> [sourceCredentials, targetCredentials]
     }
@@ -392,14 +392,14 @@ class AllowLaunchAtomicOperationUnitSpec extends Specification {
     def description = new AllowLaunchDescription(targetAccount: 'target', amiName: 'ami-123456', region: 'us-west-1', credentials: sourceCredentials)
     def op = new AllowLaunchAtomicOperation(description)
     op.amazonClientProvider = Mock(AmazonClientProvider)
-    op.accountCredentialsProvider = Mock(AccountCredentialsProvider)
+    op.credentialsRepository = Mock(AccountCredentialsProvider)
 
     when:
     op.operate([])
 
     then:
     thrown IllegalArgumentException
-    with(op.accountCredentialsProvider) {
+    with(op.credentialsRepository) {
       1 * getCredentials('target') >> targetCredentials
       1 * getAll() >> [sourceCredentials, targetCredentials]
     }

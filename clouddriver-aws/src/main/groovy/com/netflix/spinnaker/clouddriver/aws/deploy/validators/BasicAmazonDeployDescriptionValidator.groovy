@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component
 @AmazonOperation(AtomicOperations.CREATE_SERVER_GROUP)
 class BasicAmazonDeployDescriptionValidator extends AmazonDescriptionValidationSupport<BasicAmazonDeployDescription> {
   @Autowired
-  CredentialsRepository<NetflixAmazonCredentials> accountCredentialsProvider
+  CredentialsRepository<NetflixAmazonCredentials> credentialsRepository
 
   @Override
   void validate(List priorDescriptions, BasicAmazonDeployDescription description, ValidationErrors errors) {
@@ -42,7 +42,7 @@ class BasicAmazonDeployDescriptionValidator extends AmazonDescriptionValidationS
     if (!description.credentials) {
       errors.rejectValue "credentials", "basicAmazonDeployDescription.credentials.empty"
     } else {
-      credentials = accountCredentialsProvider.getOne(description?.credentials?.name)
+      credentials = credentialsRepository.getOne(description?.credentials?.name)
       if (!(credentials instanceof AmazonCredentials)) {
         errors.rejectValue("credentials", "basicAmazonDeployDescription.credentials.invalid")
       }
