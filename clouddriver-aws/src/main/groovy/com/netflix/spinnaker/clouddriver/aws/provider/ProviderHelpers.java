@@ -224,7 +224,7 @@ public class ProviderHelpers {
         providers ->
             providers.stream()
                 .filter(it -> it.supports(AwsProvider.PROVIDER_NAME))
-                .forEach(provider -> newlyAddedAgents.addAll(provider.agents())));
+                .forEach(provider -> newlyAddedAgents.addAll(provider.agents(credentials))));
     return new BuildResult(newlyAddedAgents, publicRegions);
   }
 
