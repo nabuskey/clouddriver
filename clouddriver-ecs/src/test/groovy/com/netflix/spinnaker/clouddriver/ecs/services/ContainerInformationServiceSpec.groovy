@@ -255,7 +255,7 @@ class ContainerInformationServiceSpec extends Specification {
     def ip = '127.0.0.1'
     def port = 1337
 
-    def ecsAccount = new ECSCredentialsConfig.Account(
+    def ecsAccount = new ECSCredentialsConfig.ECSAccount(
       name: account,
       awsAccount: 'aws-' + account
     )
@@ -320,7 +320,7 @@ class ContainerInformationServiceSpec extends Specification {
     def containerInstanceArn = 'container-instance-arn'
     def port = 1337
 
-    def ecsAccount = new ECSCredentialsConfig.Account(
+    def ecsAccount = new ECSCredentialsConfig.ECSAccount(
       name: account,
       awsAccount: 'aws-' + account
     )
@@ -394,7 +394,7 @@ class ContainerInformationServiceSpec extends Specification {
       ]
     )
 
-    def ecsAccount = new ECSCredentialsConfig.Account(
+    def ecsAccount = new ECSCredentialsConfig.ECSAccount(
       name: 'test-account',
       awsAccount: 'aws-test-account'
     )
@@ -419,7 +419,7 @@ class ContainerInformationServiceSpec extends Specification {
     def account = 'test-account'
     def region = 'us-west-1'
 
-    def ecsAccount = new ECSCredentialsConfig.Account(
+    def ecsAccount = new ECSCredentialsConfig.ECSAccount(
       name: account,
       awsAccount: 'aws-' + account
     )
@@ -471,7 +471,7 @@ class ContainerInformationServiceSpec extends Specification {
     def ip = '127.0.0.1'
     def port = 1337
 
-    def ecsAccount = new ECSCredentialsConfig.Account(
+    def ecsAccount = new ECSCredentialsConfig.ECSAccount(
       name: account,
       awsAccount: 'aws-' + account
     )
@@ -524,7 +524,7 @@ class ContainerInformationServiceSpec extends Specification {
       ]
     )
 
-    def ecsAccount = new ECSCredentialsConfig.Account(
+    def ecsAccount = new ECSCredentialsConfig.ECSAccount(
       name: 'test-account',
       awsAccount: 'aws-test-account'
     )
@@ -552,7 +552,7 @@ class ContainerInformationServiceSpec extends Specification {
     given:
     def task = new Task(containerInstanceArn: 'container-instance-arn')
     def containerInstance = new ContainerInstance(ec2InstanceId: 'i-deadbeef')
-    def ecsAccount = new ECSCredentialsConfig.Account(
+    def ecsAccount = new ECSCredentialsConfig.ECSAccount(
       name: 'ecs-account',
       awsAccount: 'aws-test-account'
     )
@@ -593,7 +593,7 @@ class ContainerInformationServiceSpec extends Specification {
     given:
     def task = new Task(containerInstanceArn: 'container-instance-arn')
     def containerInstance = new ContainerInstance(ec2InstanceId: 'i-deadbeef')
-    def ecsAccount = new ECSCredentialsConfig.Account(
+    def ecsAccount = new ECSCredentialsConfig.ECSAccount(
       name: 'ecs-account',
       awsAccount: 'aws-test-account'
     )
@@ -652,7 +652,7 @@ class ContainerInformationServiceSpec extends Specification {
     given:
     def task = new Task(containerInstanceArn: 'container-instance-arn')
     def containerInstance = new ContainerInstance(ec2InstanceId: 'i-deadbeef')
-    def ecsAccount = new ECSCredentialsConfig.Account(
+    def ecsAccount = new ECSCredentialsConfig.ECSAccount(
       name: 'ecs-account',
       awsAccount: 'aws-test-account'
     )
@@ -691,7 +691,7 @@ class ContainerInformationServiceSpec extends Specification {
     given:
     def task = new Task(containerInstanceArn: 'container-instance-arn')
     def containerInstance = new ContainerInstance(ec2InstanceId: 'i-deadbeef')
-    def ecsAccount = new ECSCredentialsConfig.Account(
+    def ecsAccount = new ECSCredentialsConfig.ECSAccount(
       name: 'ecs-account',
       awsAccount: 'aws-test-account'
     )
@@ -712,7 +712,7 @@ class ContainerInformationServiceSpec extends Specification {
     given:
     def task = new Task(containerInstanceArn: 'container-instance-arn')
     def containerInstance = new ContainerInstance(ec2InstanceId: 'i-deadbeef')
-    def ecsAccount = new ECSCredentialsConfig.Account(
+    def ecsAccount = new ECSCredentialsConfig.ECSAccount(
       name: 'ecs-account',
       awsAccount: 'aws-test-account'
     )
@@ -740,7 +740,7 @@ class ContainerInformationServiceSpec extends Specification {
 
   def 'should return an aws account name'(){
     given:
-    def ecsAccount = new ECSCredentialsConfig.Account(
+    def ecsAccount = new ECSCredentialsConfig.ECSAccount(
       name: 'ecs-account',
       awsAccount: 'aws-test-account'
     )
@@ -756,7 +756,7 @@ class ContainerInformationServiceSpec extends Specification {
 
   def 'should return an null when no aws account is found associated to the ecs account'(){
     given:
-    def ecsAccount = new ECSCredentialsConfig.Account(
+    def ecsAccount = new ECSCredentialsConfig.ECSAccount(
       name: 'ecs-account',
       awsAccount: 'aws-test-account'
     )

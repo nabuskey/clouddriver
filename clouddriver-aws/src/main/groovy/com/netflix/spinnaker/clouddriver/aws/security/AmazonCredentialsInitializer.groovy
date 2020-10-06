@@ -108,7 +108,6 @@ class AmazonCredentialsInitializer {
   }
 
   @Bean
-  @DependsOn("amazonCredentialsLifecycleHandler")
   @ConditionalOnMissingBean(
     value = Account.class,
     parameterizedContainer = CredentialsDefinitionSource.class
