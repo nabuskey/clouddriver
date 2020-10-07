@@ -24,6 +24,7 @@ import com.amazonaws.services.ec2.model.InstanceState
 import com.amazonaws.services.ec2.model.Reservation
 import com.amazonaws.services.ec2.model.Tag
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest
+import com.google.gson.reflect.TypeToken
 import com.netflix.spinnaker.clouddriver.aws.TestCredential
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
 import com.netflix.spinnaker.clouddriver.aws.deploy.ops.DetachInstancesAtomicOperation
@@ -49,11 +50,10 @@ class CleanupDetachedInstancesAgentSpec extends Specification {
       1 * getAmazonEC2(test, "us-east-1", true) >> { amazonEC2USE }
       0 * _
     }
-    def accountCredentialsRepository = Mock(MapBackedCredentialsRepository<NetflixAmazonCredentials>) {
-      1 * getAll() >> [test]
-      0 * _
-    }
-    def agent = new CleanupDetachedInstancesAgent(amazonClientProvider, accountCredentialsRepository)
+    MapBackedCredentialsRepository<NetflixAmazonCredentials> credentialsRepository =
+      Stub( type: new TypeToken<MapBackedCredentialsRepository<NetflixAmazonCredentials>>(){}.type) as MapBackedCredentialsRepository<NetflixAmazonCredentials>
+    credentialsRepository.getAll() >> [test]
+    def agent = new CleanupDetachedInstancesAgent(amazonClientProvider, credentialsRepository)
 
     when:
     agent.run()

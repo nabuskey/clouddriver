@@ -43,6 +43,7 @@ public class AmazonCredentialsParser<U extends Account, V extends NetflixAmazonC
   private final CredentialTranslator<V> credentialTranslator;
   private final ObjectMapper objectMapper;
   private final CredentialsConfig credentialsConfig;
+  private Lazy<List<Region>> defaultRegions;
 
   public AmazonCredentialsParser(
       AWSCredentialsProvider credentialsProvider,
@@ -56,6 +57,21 @@ public class AmazonCredentialsParser<U extends Account, V extends NetflixAmazonC
     this.objectMapper = new ObjectMapper();
     this.credentialTranslator = findTranslator(credentialsType, this.objectMapper);
     this.credentialsConfig = credentialsConfig;
+    this.defaultRegions = createDefaults(credentialsConfig.getDefaultRegions());
+  }
+
+  public AmazonCredentialsParser(
+      AWSCredentialsProvider credentialsProvider,
+      AWSAccountInfoLookup awsAccountInfoLookup,
+      Class<V> credentialsType,
+      CredentialsConfig credentialsConfig) {
+    this.credentialsProvider = Objects.requireNonNull(credentialsProvider, "credentialsProvider");
+    this.awsAccountInfoLookup = awsAccountInfoLookup;
+    this.templateValues = Collections.emptyMap();
+    this.objectMapper = new ObjectMapper();
+    this.credentialTranslator = findTranslator(credentialsType, this.objectMapper);
+    this.credentialsConfig = credentialsConfig;
+    this.defaultRegions = createDefaults(credentialsConfig.getDefaultRegions());
   }
 
   private Lazy<List<Region>> createDefaults(final List<Region> defaults) {
@@ -171,18 +187,6 @@ public class AmazonCredentialsParser<U extends Account, V extends NetflixAmazonC
     return result;
   }
 
-  public V load(String accountName) throws Throwable {
-    CredentialsConfig config = new CredentialsConfig();
-    Account account = new Account();
-    account.setName(accountName);
-    config.setAccounts(Collections.singletonList(account));
-    List<V> result = load(config);
-    if (result.size() != 1) {
-      throw new IllegalStateException("failed to create account");
-    }
-    return result.get(0);
-  }
-
   public List<V> load(CredentialsConfig source) throws Throwable {
     final CredentialsConfig config = objectMapper.convertValue(source, CredentialsConfig.class);
 
@@ -207,14 +211,13 @@ public class AmazonCredentialsParser<U extends Account, V extends NetflixAmazonC
         return a;
       }
     } catch (Throwable t) {
-      //      t.printStackTrace();
+      t.printStackTrace();
       return null;
     }
     return null;
   }
 
   private V parseAccount(CredentialsConfig config, Account account) throws Throwable {
-    Lazy<List<Region>> defaultRegions = createDefaults(config.getDefaultRegions());
     if (account.getAccountId() == null) {
       if (!credentialTranslator.resolveAccountId()) {
         throw new IllegalArgumentException(
