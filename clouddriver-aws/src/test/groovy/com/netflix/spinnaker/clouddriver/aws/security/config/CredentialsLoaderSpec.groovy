@@ -20,7 +20,6 @@ import com.amazonaws.auth.AWSCredentialsProvider
 import com.netflix.spinnaker.clouddriver.aws.security.AWSAccountInfoLookup
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials
-import com.netflix.spinnaker.clouddriver.aws.security.AssumeRoleAmazonCredentials
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAssumeRoleAmazonCredentials
 import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsConfig.Account

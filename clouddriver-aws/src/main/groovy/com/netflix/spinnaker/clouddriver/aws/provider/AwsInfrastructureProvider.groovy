@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component
 
 import static com.netflix.spinnaker.clouddriver.aws.cache.Keys.Namespace.SECURITY_GROUPS
 
-@Component
 class AwsInfrastructureProvider extends BaseProvider implements SearchableProvider {
   public static final TypeReference<Map<String, Object>> ATTRIBUTES = new TypeReference<Map<String, Object>>() {}
 

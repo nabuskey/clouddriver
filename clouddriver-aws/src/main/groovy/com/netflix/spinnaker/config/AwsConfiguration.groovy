@@ -208,6 +208,11 @@ class AwsConfiguration {
   }
 
   @Bean
+  AwsCleanupProvider awsOperationProvider() {
+    return new AwsCleanupProvider()
+  }
+
+  @Bean
   @DependsOn('amazonCredentialsRepository')
   SecurityGroupLookupFactory securityGroupLookup(
     AmazonClientProvider amazonClientProvider,

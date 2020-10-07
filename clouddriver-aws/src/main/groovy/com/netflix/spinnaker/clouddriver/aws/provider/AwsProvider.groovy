@@ -130,15 +130,13 @@ class AwsProvider extends BaseProvider implements SearchableProvider, EurekaAwar
 
   private String getCredentialName(String accountId, boolean allowMultipleEurekaPerAccount, String eurekaAccountName) {
     if (allowMultipleEurekaPerAccount) {
-      def credentialName = credentialsRepository.all.find {
-        it instanceof NetflixAmazonCredentials && it.accountId == accountId && it.name == eurekaAccountName
-      }?.name
+      def credentialName = credentialsRepository.getOne(eurekaAccountName)
       if (credentialName) {
         return credentialName
       }
     }
     return credentialsRepository.all.find {
-      it instanceof NetflixAmazonCredentials && it.accountId == accountId
+      it.accountId == accountId
     }?.name
   }
 

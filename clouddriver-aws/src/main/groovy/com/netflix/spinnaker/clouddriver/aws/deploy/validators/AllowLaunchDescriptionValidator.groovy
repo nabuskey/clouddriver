@@ -39,7 +39,7 @@ class AllowLaunchDescriptionValidator extends DescriptionValidator<AllowLaunchDe
     }
     if (!description.targetAccount) {
       errors.rejectValue("targetAccount", "allowLaunchDescription.targetAccount.empty")
-    } else if (!credentialsRepository.getAll().collect { it.name }.contains(description.targetAccount)) {
+    } else if (credentialsRepository.getOne(description.targetAccount) == null) {
       errors.rejectValue("targetAccount", "allowLaunchDescription.targetAccount.not.configured")
     }
   }

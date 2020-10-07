@@ -43,7 +43,7 @@ class BasicAmazonDeployDescriptionValidator extends AmazonDescriptionValidationS
       errors.rejectValue "credentials", "basicAmazonDeployDescription.credentials.empty"
     } else {
       credentials = credentialsRepository.getOne(description?.credentials?.name)
-      if (!(credentials instanceof AmazonCredentials)) {
+      if (credentials == null) {
         errors.rejectValue("credentials", "basicAmazonDeployDescription.credentials.invalid")
       }
     }

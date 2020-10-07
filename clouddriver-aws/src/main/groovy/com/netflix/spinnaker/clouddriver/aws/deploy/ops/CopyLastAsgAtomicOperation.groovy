@@ -91,7 +91,7 @@ class CopyLastAsgAtomicOperation implements AtomicOperation<DeploymentResult> {
       def sourceAsgCredentials
       if (description.source.account && description.source.region && description.source.asgName) {
         sourceRegion = description.source.region
-        sourceAsgCredentials = credentialsRepository.getOne(description.source.account) as NetflixAmazonCredentials
+        sourceAsgCredentials = credentialsRepository.getOne(description.source.account)
         def sourceAutoScaling = amazonClientProvider.getAutoScaling(sourceAsgCredentials, sourceRegion, true)
         def request = new DescribeAutoScalingGroupsRequest(autoScalingGroupNames: [description.source.asgName])
         List<AutoScalingGroup> ancestorAsgs = sourceAutoScaling.describeAutoScalingGroups(request).autoScalingGroups

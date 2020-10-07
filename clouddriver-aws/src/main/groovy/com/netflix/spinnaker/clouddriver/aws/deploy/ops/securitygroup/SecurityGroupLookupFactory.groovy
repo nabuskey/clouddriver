@@ -30,12 +30,12 @@ import org.slf4j.LoggerFactory
 class SecurityGroupLookupFactory {
 
   private final AmazonClientProvider amazonClientProvider
-  private final CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository
+  private final CredentialsRepository<NetflixAmazonCredentials> ac
 
   SecurityGroupLookupFactory(AmazonClientProvider amazonClientProvider,
-                             CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository) {
+                             CredentialsRepository<NetflixAmazonCredentials> credentialsRepository) {
     this.amazonClientProvider = amazonClientProvider
-    this.accountCredentialsRepository = accountCredentialsRepository
+    this.credentialsRepository = credentialsRepository
   }
 
   SecurityGroupLookup getInstance(String region) {
@@ -43,9 +43,7 @@ class SecurityGroupLookupFactory {
   }
 
   SecurityGroupLookup getInstance(String region, boolean skipEdda) {
-    final allNetflixAmazonCredentials = (Set<NetflixAmazonCredentials>) accountCredentialsRepository.all.findAll {
-      it instanceof NetflixAmazonCredentials
-    }
+    final allNetflixAmazonCredentials = credentialsRepository.getAll()
     final accounts = ImmutableSet.copyOf(allNetflixAmazonCredentials)
     new SecurityGroupLookup(amazonClientProvider, region, accounts, skipEdda)
   }

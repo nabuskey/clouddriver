@@ -42,7 +42,7 @@ class ModifyAsgLaunchConfigurationDescriptionValidator extends AmazonDescription
       errors.rejectValue "credentials", "modifyAsgLaunchConfigurationDescription.credentials.empty"
     } else {
       def credentials = credentialsRepository.getOne(description?.credentials?.name)
-      if (!(credentials instanceof AmazonCredentials)) {
+      if (credentials == null) {
         errors.rejectValue("credentials", "modifyAsgLaunchConfigurationDescription.credentials.invalid")
       }
     }

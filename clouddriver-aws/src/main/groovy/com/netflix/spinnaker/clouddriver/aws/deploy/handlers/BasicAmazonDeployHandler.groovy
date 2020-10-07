@@ -246,8 +246,8 @@ class BasicAmazonDeployHandler implements DeployHandler<BasicAmazonDeployDescrip
       validateInstanceType(ami, description.instanceType)
 
       def account = accountCredentialsRepository.getOne(description.credentials.name)
-      if (!(account instanceof NetflixAmazonCredentials)) {
-        throw new IllegalArgumentException("Unsupported account type ${account.class.simpleName} for this operation")
+      if (account == null) {
+        throw new IllegalArgumentException("Account with name ${description.credentials.name} could not be found.")
       }
 
       if (description.useAmiBlockDeviceMappings) {
@@ -543,7 +543,7 @@ class BasicAmazonDeployHandler implements DeployHandler<BasicAmazonDeployDescrip
                                                                                            BasicAmazonDeployDescription.Source source) {
     if (source.account && source.region && source.asgName) {
       def sourceRegion = source.region
-      def sourceAsgCredentials = accountCredentialsRepository.getOne(source.account) as NetflixAmazonCredentials
+      def sourceAsgCredentials = accountCredentialsRepository.getOne(source.account)
       def regionScopedProvider = regionScopedProviderFactory.forRegion(sourceAsgCredentials, sourceRegion)
 
       def sourceAsgs = regionScopedProvider.autoScaling.describeAutoScalingGroups(
