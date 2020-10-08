@@ -113,7 +113,6 @@ public class ProviderHelpers {
 
   public static BuildResult buildAwsProviderAgents(
       NetflixAmazonCredentials credentials,
-      AccountCredentialsRepository accountCredentialsRepository,
       AmazonClientProvider amazonClientProvider,
       ObjectMapper objectMapper,
       Registry registry,
@@ -124,11 +123,10 @@ public class ProviderHelpers {
       EddaApiFactory eddaApiFactory,
       ApplicationContext ctx,
       Set<String> publicRegions) {
+
     Set<String> scheduledAccounts = ProviderUtils.getScheduledAccounts(awsProvider);
     List<Agent> newlyAddedAgents = new ArrayList<>();
-    Set<NetflixAmazonCredentials> allAccounts =
-        ProviderUtils.buildThreadSafeSetOfAccounts(
-            accountCredentialsRepository, NetflixAmazonCredentials.class, AmazonCloudProvider.ID);
+
     for (NetflixAmazonCredentials.AWSRegion region : credentials.getRegions()) {
       if (!scheduledAccounts.contains(credentials.getName())) {
         newlyAddedAgents.add(

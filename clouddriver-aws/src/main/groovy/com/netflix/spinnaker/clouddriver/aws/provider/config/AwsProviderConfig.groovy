@@ -104,8 +104,6 @@ class AwsProviderConfig {
                                       EddaTimeoutConfig eddaTimeoutConfig,
                                       DynamicConfigService dynamicConfigService) {
     Set<NetflixAmazonCredentials> allAccounts = ProviderUtils.buildThreadSafeSetOfAccounts(accountCredentialsRepository, NetflixAmazonCredentials, AmazonCloudProvider.ID)
-// calling below multiple times might not be ideal. Especially when processing a large amount of credentials.
-    // Might need a aws specific repository implementation.
     List<Agent> newlyAddedAgents = []
 
     //only index public images once per region
@@ -114,7 +112,7 @@ class AwsProviderConfig {
     //sort the accounts in case of a reconfigure, we are more likely to re-index the public images in the same caching agent
     //TODO(cfieber)-rework this is after rework of AWS Image/NamedImage keys
     allAccounts.sort { it.name }.each { NetflixAmazonCredentials credentials ->
-      def result = ProviderHelpers.buildAwsProviderAgents(credentials, accountCredentialsRepository, amazonClientProvider, objectMapper,
+      def result = ProviderHelpers.buildAwsProviderAgents(credentials, amazonClientProvider, objectMapper,
         registry, eddaTimeoutConfig, awsProvider, amazonCloudProvider, dynamicConfigService, eddaApiFactory, ctx, publicRegions
       )
       newlyAddedAgents.addAll(result.agents)

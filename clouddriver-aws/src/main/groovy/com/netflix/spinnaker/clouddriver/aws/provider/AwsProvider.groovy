@@ -51,7 +51,7 @@ class AwsProvider extends BaseProvider implements SearchableProvider, EurekaAwar
     (CLUSTERS.ns)      : '/applications/${application.toLowerCase()}/clusters/$account/$cluster'
   ].asImmutable()
 
-  final Map<SearchableResource, SearchableProvider.SearchResultHydrator> searchResultHydrators = [
+  final Map<SearchableResource, SearchResultHydrator> searchResultHydrators = [
     (new AmazonSearchableResource(INSTANCES.ns)): new InstanceSearchResultHydrator(),
   ]
 
