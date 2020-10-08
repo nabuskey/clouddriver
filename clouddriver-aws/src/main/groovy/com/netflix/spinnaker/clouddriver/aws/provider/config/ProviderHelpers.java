@@ -58,14 +58,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 
 public class ProviderHelpers {
+
+  @Getter
   @RequiredArgsConstructor
   public static class BuildResult {
-    public final List<Agent> agents;
-    public final Set<String> regionsToAdd;
+    private final List<Agent> agents;
+    private final Set<String> regionsToAdd;
   }
 
   public static BuildResult buildAwsInfrastructureAgents(
@@ -229,7 +232,6 @@ public class ProviderHelpers {
         }
       }
     }
-    awsCleanupProvider.getAgents().addAll(newlyAddedAgents);
     return newlyAddedAgents;
   }
 

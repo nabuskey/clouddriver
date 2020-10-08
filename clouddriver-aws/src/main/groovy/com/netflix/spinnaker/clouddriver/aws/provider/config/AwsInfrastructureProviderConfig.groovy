@@ -18,7 +18,6 @@ package com.netflix.spinnaker.clouddriver.aws.provider.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.netflix.spectator.api.Registry
-import com.netflix.spinnaker.cats.agent.Agent
 import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsInfrastructureProvider
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
@@ -31,8 +30,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.DependsOn
 
-import java.util.concurrent.ConcurrentHashMap
-
 @Configuration
 class AwsInfrastructureProviderConfig {
   @Bean
@@ -43,7 +40,7 @@ class AwsInfrastructureProviderConfig {
                                                       Registry registry,
                                                       EddaTimeoutConfig eddaTimeoutConfig) {
     def awsInfrastructureProvider =
-      new AwsInfrastructureProvider(Collections.newSetFromMap(new ConcurrentHashMap<Agent, Boolean>()))
+      new AwsInfrastructureProvider()
 
     synchronizeAwsInfrastructureProvider(awsInfrastructureProvider,
                                          amazonClientProvider,
@@ -68,8 +65,8 @@ class AwsInfrastructureProviderConfig {
     allAccounts.each { NetflixAmazonCredentials credentials ->
       def result = ProviderHelpers.buildAwsInfrastructureAgents(credentials, awsInfrastructureProvider, accountCredentialsRepository,
         amazonClientProvider, amazonObjectMapper, registry, eddaTimeoutConfig, regions)
-      regions.addAll(result.regionsToAdd)
-      newlyAddedAgents.addAll(result.agents)
+      regions.addAll(result.getRegionsToAdd())
+      newlyAddedAgents.addAll(result.getAgents())
     }
 
     // If there is an agent scheduler, then this provider has been through the AgentController in the past.
@@ -77,6 +74,6 @@ class AwsInfrastructureProviderConfig {
     if (awsInfrastructureProvider.agentScheduler) {
       ProviderUtils.rescheduleAgents(awsInfrastructureProvider, newlyAddedAgents)
     }
-    awsInfrastructureProvider.agents.addAll(newlyAddedAgents)
+    awsInfrastructureProvider.addAgents(newlyAddedAgents)
   }
 }

@@ -40,7 +40,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.DependsOn
 
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -62,7 +61,7 @@ class AwsProviderConfig {
                           EddaTimeoutConfig eddaTimeoutConfig,
                           DynamicConfigService dynamicConfigService) {
     def awsProvider =
-      new AwsProvider(accountCredentialsRepository, Collections.newSetFromMap(new ConcurrentHashMap<Agent, Boolean>()))
+      new AwsProvider(accountCredentialsRepository)
 
     synchronizeAwsProvider(awsProvider,
                            amazonCloudProvider,
@@ -138,7 +137,7 @@ class AwsProviderConfig {
       newlyAddedAgents.addAll(it.agents())
     }
 
-    awsProvider.agents.addAll(newlyAddedAgents)
+    awsProvider.addAgents(newlyAddedAgents)
     awsProvider.synchronizeHealthAgents()
   }
 }
