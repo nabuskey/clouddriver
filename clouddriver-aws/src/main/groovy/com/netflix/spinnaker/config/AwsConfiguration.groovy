@@ -246,11 +246,13 @@ class AwsConfiguration {
 
     if (!awsCleanupProvider.agentScheduler) {
       if (awsConfigurationProperties.cleanup.alarms.enabled) {
-        awsCleanupProvider.agents.add(new CleanupAlarmsAgent(amazonClientProvider, accountCredentialsRepository, awsConfigurationProperties.cleanup.alarms.daysToKeep))
+        awsCleanupProvider.addAgents(Collections.singletonList(
+          new CleanupAlarmsAgent(amazonClientProvider, accountCredentialsRepository, awsConfigurationProperties.cleanup.alarms.daysToKeep)))
       }
-      awsCleanupProvider.agents.add(new CleanupDetachedInstancesAgent(amazonClientProvider, accountCredentialsRepository))
+      awsCleanupProvider.addAgents(Collections.singletonList(
+        new CleanupDetachedInstancesAgent(amazonClientProvider, accountCredentialsRepository)))
     }
-    awsCleanupProvider.agents.addAll(newlyAddedAgents)
+    awsCleanupProvider.addAgents(newlyAddedAgents)
   }
 
   @Bean
