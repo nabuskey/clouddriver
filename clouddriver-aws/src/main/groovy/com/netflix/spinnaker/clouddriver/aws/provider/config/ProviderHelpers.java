@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.spectator.api.Registry;
 import com.netflix.spinnaker.cats.agent.Agent;
 import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider;
-import com.netflix.spinnaker.clouddriver.aws.AwsConfigurationProperties;
 import com.netflix.spinnaker.clouddriver.aws.agent.ReconcileClassicLinkSecurityGroupsAgent;
 import com.netflix.spinnaker.clouddriver.aws.edda.EddaApiFactory;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsCleanupProvider;
@@ -214,11 +213,9 @@ public class ProviderHelpers {
 
   public static List<Agent> buildAwsCleanupAgents(
       NetflixAmazonCredentials credentials,
-      AccountCredentialsRepository accountCredentialsRepository,
       AmazonClientProvider amazonClientProvider,
       AwsCleanupProvider awsCleanupProvider,
-      AwsConfiguration.DeployDefaults deployDefaults,
-      AwsConfigurationProperties awsConfigurationProperties) {
+      AwsConfiguration.DeployDefaults deployDefaults) {
     Set<String> scheduledAccounts = ProviderUtils.getScheduledAccounts(awsCleanupProvider);
     List<Agent> newlyAddedAgents = new ArrayList<>();
     if (!scheduledAccounts.contains(credentials.getName())) {
