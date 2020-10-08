@@ -17,11 +17,10 @@
 package com.netflix.spinnaker.clouddriver.aws.provider
 
 import com.fasterxml.jackson.core.type.TypeReference
+import com.netflix.spinnaker.clouddriver.aws.cache.Keys
 import com.netflix.spinnaker.clouddriver.cache.KeyParser
 import com.netflix.spinnaker.clouddriver.cache.SearchableProvider
-import com.netflix.spinnaker.clouddriver.aws.cache.Keys
 import com.netflix.spinnaker.clouddriver.security.BaseProvider
-import org.springframework.stereotype.Component
 
 import static com.netflix.spinnaker.clouddriver.aws.cache.Keys.Namespace.SECURITY_GROUPS
 
@@ -43,7 +42,7 @@ class AwsInfrastructureProvider extends BaseProvider implements SearchableProvid
     (SECURITY_GROUPS.ns): '/securityGroups/$account/$provider/$name?region=$region'
   ]
 
-  final Map<SearchableResource, SearchableProvider.SearchResultHydrator> searchResultHydrators = Collections.emptyMap()
+  final Map<SearchableResource, SearchResultHydrator> searchResultHydrators = Collections.emptyMap()
 
   @Override
   Map<String, String> parseKey(String key) {

@@ -11,15 +11,18 @@ import com.amazonaws.services.ec2.model.LaunchTemplateEbsBlockDevice
 import com.amazonaws.services.ec2.model.LaunchTemplateInstanceNetworkInterfaceSpecification
 import com.amazonaws.services.ec2.model.LaunchTemplateVersion
 import com.amazonaws.services.ec2.model.ResponseLaunchTemplateData
+import com.google.gson.reflect.TypeToken
 import com.netflix.spinnaker.clouddriver.aws.TestCredential
 import com.netflix.spinnaker.clouddriver.aws.deploy.BlockDeviceConfig
 import com.netflix.spinnaker.clouddriver.aws.deploy.description.ModifyServerGroupLaunchTemplateDescription
 import com.netflix.spinnaker.clouddriver.aws.model.AmazonBlockDevice
+import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
 import com.netflix.spinnaker.clouddriver.aws.services.AsgService
 import com.netflix.spinnaker.clouddriver.aws.services.LaunchTemplateService
 import com.netflix.spinnaker.clouddriver.aws.services.RegionScopedProviderFactory
 import com.netflix.spinnaker.clouddriver.saga.models.Saga
 import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository
+import com.netflix.spinnaker.credentials.MapBackedCredentialsRepository
 import spock.lang.Specification
 import spock.lang.Subject
 
@@ -29,9 +32,9 @@ class PrepareModifyServerGroupLaunchTemplateSpec extends Specification {
   def asgService = Mock(AsgService)
   def ec2 = Mock(AmazonEC2)
   def blockDeviceConfig = Mock(BlockDeviceConfig)
-  def credentialsRepository = Mock(AccountCredentialsRepository) {
-    getOne(_) >> credentials
-  }
+//  def credentialsRepository = Mock(AccountCredentialsRepository) {
+//    getOne(_) >> credentials
+//  }
 
   def autoScalingGroup = new AutoScalingGroup(
     autoScalingGroupName: "test-v001",
@@ -50,7 +53,8 @@ class PrepareModifyServerGroupLaunchTemplateSpec extends Specification {
 
 
   @Subject
-  def prepareAction = new PrepareModifyServerGroupLaunchTemplate(blockDeviceConfig, credentialsRepository, regionScopedProviderFactory)
+  def prepareAction = new PrepareModifyServerGroupLaunchTemplate(
+    blockDeviceConfig, credentialsRepository, regionScopedProviderFactory)
 
   def "should prepare for launch template update"() {
     given:
@@ -60,6 +64,9 @@ class PrepareModifyServerGroupLaunchTemplateSpec extends Specification {
       amiName: "ami-1",
       credentials: credentials
     )
+    MapBackedCredentialsRepository<NetflixAmazonCredentials> credentialsRepository =
+      Stub( type: new TypeToken<MapBackedCredentialsRepository<NetflixAmazonCredentials>>(){}.type) as MapBackedCredentialsRepository<NetflixAmazonCredentials>
+    credentialsRepository.getOne(_) >> [credentials]
 
     def prepareCommand = new PrepareModifyServerGroupLaunchTemplate.PrepareModifyServerGroupLaunchTemplateCommand(description, null)
 

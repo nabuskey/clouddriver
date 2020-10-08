@@ -17,7 +17,6 @@
 package com.netflix.spinnaker.clouddriver.aws.provider
 
 
-import com.netflix.spinnaker.cats.provider.Provider
 import com.netflix.spinnaker.clouddriver.security.BaseProvider
 
 class AwsCleanupProvider extends BaseProvider {

@@ -88,7 +88,7 @@ class AwsProvider extends BaseProvider implements SearchableProvider, EurekaAwar
     return Optional.of(keyParser)
   }
 
-  private static class InstanceSearchResultHydrator implements SearchableProvider.SearchResultHydrator {
+  private static class InstanceSearchResultHydrator implements SearchResultHydrator {
     @Override
     Map<String, String> hydrateResult(Cache cacheView, Map<String, String> result, String id) {
       def item = cacheView.get(INSTANCES.ns, id)
