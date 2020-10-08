@@ -215,7 +215,7 @@ class AwsConfiguration {
                                           AmazonClientProvider amazonClientProvider,
                                           AccountCredentialsRepository accountCredentialsRepository,
                                           DeployDefaults deployDefaults) {
-    def awsCleanupProvider = new AwsCleanupProvider(Collections.newSetFromMap(new ConcurrentHashMap<Agent, Boolean>()))
+    def awsCleanupProvider = new AwsCleanupProvider()
 
     synchronizeAwsCleanupProvider(awsConfigurationProperties, awsCleanupProvider, amazonClientProvider, accountCredentialsRepository, deployDefaults)
 
@@ -239,8 +239,7 @@ class AwsConfiguration {
     List<Agent> newlyAddedAgents = []
 
     allAccounts.each { account ->
-      List<Agent> result = ProviderHelpers.buildAwsCleanupAgents(account, accountCredentialsRepository, amazonClientProvider, awsCleanupProvider,
-        deployDefaults, awsConfigurationProperties)
+      List<Agent> result = ProviderHelpers.buildAwsCleanupAgents(account, amazonClientProvider, awsCleanupProvider, deployDefaults)
       newlyAddedAgents.addAll(result)
     }
 
