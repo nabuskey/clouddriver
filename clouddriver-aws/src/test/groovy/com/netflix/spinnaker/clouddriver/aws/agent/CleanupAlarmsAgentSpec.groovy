@@ -26,6 +26,8 @@ import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.netflix.spinnaker.clouddriver.aws.TestCredential
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
 import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository
+import com.netflix.spinnaker.credentials.CredentialsRepository
+import com.netflix.spinnaker.credentials.MapBackedCredentialsRepository
 import org.joda.time.DateTime
 import spock.lang.Shared
 import spock.lang.Specification
@@ -40,7 +42,7 @@ class CleanupAlarmsAgentSpec extends Specification {
   AmazonCloudWatch cloudWatchUSW
   AmazonCloudWatch cloudWatchUSE
   AmazonClientProvider amazonClientProvider
-  AccountCredentialsRepository accountCredentialsRepository
+  MapBackedCredentialsRepository accountCredentialsRepository
   CleanupAlarmsAgent agent
   String validUuid = UUID.randomUUID().toString()
   String deletableAlarmName = "clouddriver-test-v123-alarm-" + validUuid
@@ -59,7 +61,7 @@ class CleanupAlarmsAgentSpec extends Specification {
       0 * _
     }
 
-    accountCredentialsRepository = Mock(AccountCredentialsRepository) {
+    accountCredentialsRepository = Mock(MapBackedCredentialsRepository) {
       1 * getAll() >> [test]
       0 * _
     }
