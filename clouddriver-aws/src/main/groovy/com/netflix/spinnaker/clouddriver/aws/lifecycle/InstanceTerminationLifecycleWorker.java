@@ -260,9 +260,9 @@ public class InstanceTerminationLifecycleWorker implements Runnable {
   }
 
   private NetflixAmazonCredentials getAccountCredentialsById(String accountId) {
-    for (AccountCredentials credentials : credentialsRepository.getAll()) {
+    for (NetflixAmazonCredentials credentials : credentialsRepository.getAll()) {
       if (credentials.getAccountId() != null && credentials.getAccountId().equals(accountId)) {
-        return (NetflixAmazonCredentials) credentials;
+        return credentials;
       }
     }
     return null;

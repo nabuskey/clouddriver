@@ -20,14 +20,12 @@ import com.amazonaws.services.ec2.model.IpPermission
 import com.amazonaws.services.ec2.model.SecurityGroup
 import com.amazonaws.services.ec2.model.UserIdGroupPair
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.common.collect.ImmutableSet
 import com.netflix.spinnaker.cats.cache.Cache
 import com.netflix.spinnaker.cats.cache.CacheData
 import com.netflix.spinnaker.cats.cache.RelationshipCacheFilter
 import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider
 import com.netflix.spinnaker.clouddriver.aws.cache.Keys
 import com.netflix.spinnaker.clouddriver.aws.model.AmazonSecurityGroup
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
 import com.netflix.spinnaker.clouddriver.model.AddressableRange
 import com.netflix.spinnaker.clouddriver.model.SecurityGroupProvider
@@ -49,7 +47,6 @@ class AmazonSecurityGroupProvider implements SecurityGroupProvider<AmazonSecurit
   final CredentialsRepository<NetflixAmazonCredentials> credentialsRepository
   final Cache cacheView
   final ObjectMapper objectMapper
-  final Set<AmazonCredentials> accounts
 
   @Autowired
   AmazonSecurityGroupProvider(CredentialsRepository<NetflixAmazonCredentials> credentialsRepository,
@@ -58,11 +55,6 @@ class AmazonSecurityGroupProvider implements SecurityGroupProvider<AmazonSecurit
     this.credentialsRepository = credentialsRepository
     this.cacheView = cacheView
     this.objectMapper = objectMapper
-
-    final allAmazonCredentials = (Set<AmazonCredentials>) credentialsRepository.getAll().findAll {
-      it instanceof AmazonCredentials
-    }
-    accounts = ImmutableSet.copyOf(allAmazonCredentials)
   }
 
   @Override
@@ -243,7 +235,7 @@ class AmazonSecurityGroupProvider implements SecurityGroupProvider<AmazonSecurit
     permission.userIdGroupPairs.each { sg ->
       def groupAndProtocol = new GroupAndProtocol(sg.groupId, permission.ipProtocol)
       if (!rules.containsKey(groupAndProtocol)) {
-        final ingressAccount = accounts.find { it.accountId == sg.userId }
+        final ingressAccount = credentialsRepository.getAll().find {it.accountId == sg.userId}
         Map<String, String> ingressGroupSummary = getIngressGroupNameAndVpcId(sg, account, ingressAccount?.name, region, vpcId)
         rules.put(groupAndProtocol, [
           protocol     : permission.ipProtocol,

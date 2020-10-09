@@ -43,7 +43,6 @@ import com.netflix.spinnaker.credentials.CredentialsRepository;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -77,6 +76,7 @@ class LaunchFailureNotificationAgent implements RunnableAgent, CustomScheduledAg
   LaunchFailureNotificationAgent(
       ObjectMapper objectMapper,
       AmazonClientProvider amazonClientProvider,
+      NetflixAmazonCredentials netflixAmazonCredentials,
       CredentialsRepository<NetflixAmazonCredentials> credentialsRepository,
       LaunchFailureConfigurationProperties properties,
       EntityTagger serverGroupTagger) {
@@ -86,9 +86,8 @@ class LaunchFailureNotificationAgent implements RunnableAgent, CustomScheduledAg
     this.properties = properties;
     this.serverGroupTagger = serverGroupTagger;
 
-    Set<NetflixAmazonCredentials> accountCredentials = credentialsRepository.getAll();
-    this.topicARN = new ARN(accountCredentials, properties.getTopicARN());
-    this.queueARN = new ARN(accountCredentials, properties.getQueueARN());
+    this.topicARN = new ARN(netflixAmazonCredentials, properties.getTopicARN());
+    this.queueARN = new ARN(netflixAmazonCredentials, properties.getQueueARN());
   }
 
   @Override

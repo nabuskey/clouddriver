@@ -71,7 +71,7 @@ public class InstanceTerminationLifecycleWorkerProvider {
   @PostConstruct
   public void start() {
     NetflixAmazonCredentials credentials =
-        (NetflixAmazonCredentials) credentialsRepository.getOne(properties.getAccountName());
+        credentialsRepository.getOne(properties.getAccountName());
     ExecutorService executorService =
         Executors.newFixedThreadPool(
             credentials.getRegions().size(),

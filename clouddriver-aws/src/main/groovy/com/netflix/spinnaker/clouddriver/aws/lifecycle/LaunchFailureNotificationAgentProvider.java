@@ -70,6 +70,7 @@ public class LaunchFailureNotificationAgentProvider implements AgentProvider {
                     new LaunchFailureNotificationAgent(
                         objectMapper,
                         amazonClientProvider,
+                        netflixAmazonCredentials,
                         credentialsRepository,
                         new LaunchFailureConfigurationProperties(
                             properties.getAccountName(),

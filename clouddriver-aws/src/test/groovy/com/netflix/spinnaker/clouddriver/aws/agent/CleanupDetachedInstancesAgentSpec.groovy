@@ -17,21 +17,12 @@
 package com.netflix.spinnaker.clouddriver.aws.agent
 
 import com.amazonaws.services.ec2.AmazonEC2
-import com.amazonaws.services.ec2.model.DescribeInstancesRequest
-import com.amazonaws.services.ec2.model.DescribeInstancesResult
-import com.amazonaws.services.ec2.model.Instance
-import com.amazonaws.services.ec2.model.InstanceState
-import com.amazonaws.services.ec2.model.Reservation
-import com.amazonaws.services.ec2.model.Tag
-import com.amazonaws.services.ec2.model.TerminateInstancesRequest
-import com.google.gson.reflect.TypeToken
+import com.amazonaws.services.ec2.model.*
 import com.netflix.spinnaker.clouddriver.aws.TestCredential
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
 import com.netflix.spinnaker.clouddriver.aws.deploy.ops.DetachInstancesAtomicOperation
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository
 import com.netflix.spinnaker.credentials.CredentialsRepository
-import com.netflix.spinnaker.credentials.MapBackedCredentialsRepository
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -50,9 +41,9 @@ class CleanupDetachedInstancesAgentSpec extends Specification {
       1 * getAmazonEC2(test, "us-east-1", true) >> { amazonEC2USE }
       0 * _
     }
-    MapBackedCredentialsRepository<NetflixAmazonCredentials> credentialsRepository =
-      Stub( type: new TypeToken<MapBackedCredentialsRepository<NetflixAmazonCredentials>>(){}.type) as MapBackedCredentialsRepository<NetflixAmazonCredentials>
-    credentialsRepository.getAll() >> [test]
+    CredentialsRepository<NetflixAmazonCredentials> credentialsRepository = Stub(CredentialsRepository) {
+      getAll() >> [test]
+    }
     def agent = new CleanupDetachedInstancesAgent(amazonClientProvider, credentialsRepository)
 
     when:
