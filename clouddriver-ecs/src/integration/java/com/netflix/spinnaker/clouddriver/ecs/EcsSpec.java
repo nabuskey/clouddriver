@@ -18,17 +18,18 @@ package com.netflix.spinnaker.clouddriver.ecs;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.netflix.spinnaker.cats.agent.DefaultCacheResult;
 import com.netflix.spinnaker.cats.cache.CacheData;
 import com.netflix.spinnaker.cats.cache.DefaultCacheData;
 import com.netflix.spinnaker.cats.module.CatsModule;
 import com.netflix.spinnaker.clouddriver.Main;
-import com.netflix.spinnaker.clouddriver.aws.security.*;
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
+import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsConfig;
-import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsLoader;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository;
+import com.netflix.spinnaker.credentials.definition.CredentialsParser;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -69,18 +70,14 @@ public class EcsSpec {
 
   @MockBean protected AmazonClientProvider mockAwsProvider;
 
-  @MockBean AmazonAccountsSynchronizer mockAccountsSyncer;
+  @MockBean
+  CredentialsParser<CredentialsConfig.Account, NetflixAmazonCredentials> mockCredentialsParser;
 
   @BeforeEach
   public void setup() {
     NetflixAmazonCredentials mockAwsCreds = mock(NetflixAmazonCredentials.class);
-    when(mockAccountsSyncer.synchronize(
-            any(CredentialsLoader.class),
-            any(CredentialsConfig.class),
-            any(AccountCredentialsRepository.class),
-            any(DefaultAccountConfigurationProperties.class),
-            any(CatsModule.class)))
-        .thenReturn(Collections.singletonList(mockAwsCreds));
+    when(mockCredentialsParser.parse(any(CredentialsConfig.Account.class)))
+        .thenReturn(mockAwsCreds);
   }
 
   @DisplayName(".\n===\n" + "Assert AWS and ECS providers are enabled" + "\n===")
