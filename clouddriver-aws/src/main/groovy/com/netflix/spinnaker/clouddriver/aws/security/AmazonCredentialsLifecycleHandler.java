@@ -21,15 +21,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.spectator.api.Registry;
 import com.netflix.spinnaker.cats.agent.Agent;
 import com.netflix.spinnaker.cats.agent.AgentProvider;
-import com.netflix.spinnaker.cats.module.CatsModule;
 import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider;
 import com.netflix.spinnaker.clouddriver.aws.AwsConfigurationProperties;
 import com.netflix.spinnaker.clouddriver.aws.edda.EddaApiFactory;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsCleanupProvider;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsInfrastructureProvider;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsProvider;
-import com.netflix.spinnaker.clouddriver.aws.provider.ProviderHelpers;
 import com.netflix.spinnaker.clouddriver.aws.provider.agent.ReservationReportCachingAgent;
+import com.netflix.spinnaker.clouddriver.aws.provider.config.ProviderHelpers;
 import com.netflix.spinnaker.clouddriver.aws.provider.view.AmazonS3DataProvider;
 import com.netflix.spinnaker.config.AwsConfiguration.DeployDefaults;
 import com.netflix.spinnaker.credentials.CredentialsLifecycleHandler;
@@ -62,7 +61,6 @@ public class AmazonCredentialsLifecycleHandler
   private final AmazonCloudProvider amazonCloudProvider;
   private final AmazonClientProvider amazonClientProvider;
   private final AmazonS3DataProvider amazonS3DataProvider;
-  private final CatsModule catsModule;
 
   private final AwsConfigurationProperties awsConfigurationProperties;
   private final ObjectMapper objectMapper;
@@ -168,7 +166,6 @@ public class AmazonCredentialsLifecycleHandler
     awsCleanupProvider.addAgents(newlyAddedAgents);
   }
 
-  // This needs to be moved else where.
   private void synchronizeReservationReportCachingAgentAccounts(
       NetflixAmazonCredentials credentials, boolean add) {
     ReservationReportCachingAgent reservationReportCachingAgent =
@@ -178,11 +175,11 @@ public class AmazonCredentialsLifecycleHandler
             .findFirst()
             .orElse(null);
     if (reservationReportCachingAgent != null) {
-      Collection<NetflixAmazonCredentials> reservationReportAccounts =
-          reservationReportCachingAgent.getAccounts();
-      reservationReportAccounts.removeIf(it -> it.getName().equals(credentials.getName()));
+      reservationReportCachingAgent
+          .getAccounts()
+          .removeIf(it -> it.getName().equals(credentials.getName()));
       if (add) {
-        reservationReportAccounts.add(credentials);
+        reservationReportCachingAgent.getAccounts().add(credentials);
       }
     }
   }

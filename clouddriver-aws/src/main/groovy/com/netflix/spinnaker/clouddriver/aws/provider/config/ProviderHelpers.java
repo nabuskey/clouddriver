@@ -15,7 +15,7 @@
  *
  */
 
-package com.netflix.spinnaker.clouddriver.aws.provider;
+package com.netflix.spinnaker.clouddriver.aws.provider.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.spectator.api.Registry;
@@ -27,6 +27,9 @@ import com.netflix.spinnaker.clouddriver.aws.agent.CleanupAlarmsAgent;
 import com.netflix.spinnaker.clouddriver.aws.agent.CleanupDetachedInstancesAgent;
 import com.netflix.spinnaker.clouddriver.aws.agent.ReconcileClassicLinkSecurityGroupsAgent;
 import com.netflix.spinnaker.clouddriver.aws.edda.EddaApiFactory;
+import com.netflix.spinnaker.clouddriver.aws.provider.AwsCleanupProvider;
+import com.netflix.spinnaker.clouddriver.aws.provider.AwsInfrastructureProvider;
+import com.netflix.spinnaker.clouddriver.aws.provider.AwsProvider;
 import com.netflix.spinnaker.clouddriver.aws.provider.agent.AmazonApplicationLoadBalancerCachingAgent;
 import com.netflix.spinnaker.clouddriver.aws.provider.agent.AmazonCertificateCachingAgent;
 import com.netflix.spinnaker.clouddriver.aws.provider.agent.AmazonCloudFormationCachingAgent;
@@ -72,7 +75,7 @@ public class ProviderHelpers {
   public static BuildResult buildAwsInfrastructureAgents(
       NetflixAmazonCredentials credentials,
       AwsInfrastructureProvider awsInfrastructureProvider,
-      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
+      CredentialsRepository<NetflixAmazonCredentials> credentialsRepository,
       AmazonClientProvider amazonClientProvider,
       ObjectMapper amazonObjectMapper,
       Registry registry,
@@ -84,7 +87,7 @@ public class ProviderHelpers {
       if (!scheduledAccounts.contains(credentials.getName())) {
         if (regions.add(region.getName())) {
           newlyAddedAgents.add(
-              new AmazonInstanceTypeCachingAgent(region.getName(), accountCredentialsRepository));
+              new AmazonInstanceTypeCachingAgent(region.getName(), credentialsRepository));
         }
         newlyAddedAgents.add(
             new AmazonElasticIpCachingAgent(amazonClientProvider, credentials, region.getName()));
@@ -111,7 +114,7 @@ public class ProviderHelpers {
 
   public static BuildResult buildAwsProviderAgents(
       NetflixAmazonCredentials credentials,
-      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
+      CredentialsRepository<NetflixAmazonCredentials> credentialsRepository,
       AmazonClientProvider amazonClientProvider,
       ObjectMapper objectMapper,
       Registry registry,
@@ -215,7 +218,7 @@ public class ProviderHelpers {
               registry,
               amazonClientProvider,
               amazonS3DataProvider,
-              accountCredentialsRepository,
+              credentialsRepository,
               objectMapper,
               reservationReportPool.get(),
               ctx));
@@ -230,7 +233,7 @@ public class ProviderHelpers {
 
   public static List<Agent> buildAwsCleanupAgents(
       NetflixAmazonCredentials credentials,
-      CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
+      CredentialsRepository<NetflixAmazonCredentials> credentialsRepository,
       AmazonClientProvider amazonClientProvider,
       AwsCleanupProvider awsCleanupProvider,
       AwsConfiguration.DeployDefaults deployDefaults,
@@ -246,18 +249,18 @@ public class ProviderHelpers {
         }
       }
     }
-    // AccountCredentialsRepository dependency
+    // CredentialsRepository dependency
     // Might not be safe when parallel processing
     if (awsCleanupProvider.getAgentScheduler() != null) {
       if (awsConfigurationProperties.getCleanup().getAlarms().getEnabled()) {
         newlyAddedAgents.add(
             new CleanupAlarmsAgent(
                 amazonClientProvider,
-                accountCredentialsRepository,
+                credentialsRepository,
                 awsConfigurationProperties.getCleanup().getAlarms().getDaysToKeep()));
       }
       newlyAddedAgents.add(
-          new CleanupDetachedInstancesAgent(amazonClientProvider, accountCredentialsRepository));
+          new CleanupDetachedInstancesAgent(amazonClientProvider, credentialsRepository));
     }
     return newlyAddedAgents;
   }
