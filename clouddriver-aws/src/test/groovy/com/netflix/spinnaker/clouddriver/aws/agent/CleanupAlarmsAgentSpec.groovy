@@ -25,9 +25,7 @@ import com.amazonaws.services.cloudwatch.model.DescribeAlarmsResult
 import com.amazonaws.services.cloudwatch.model.MetricAlarm
 import com.netflix.spinnaker.clouddriver.aws.TestCredential
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository
 import com.netflix.spinnaker.credentials.CredentialsRepository
-import com.netflix.spinnaker.credentials.MapBackedCredentialsRepository
 import org.joda.time.DateTime
 import spock.lang.Shared
 import spock.lang.Specification
@@ -42,7 +40,7 @@ class CleanupAlarmsAgentSpec extends Specification {
   AmazonCloudWatch cloudWatchUSW
   AmazonCloudWatch cloudWatchUSE
   AmazonClientProvider amazonClientProvider
-  MapBackedCredentialsRepository accountCredentialsRepository
+  CredentialsRepository credentialsRepository
   CleanupAlarmsAgent agent
   String validUuid = UUID.randomUUID().toString()
   String deletableAlarmName = "clouddriver-test-v123-alarm-" + validUuid
@@ -61,12 +59,12 @@ class CleanupAlarmsAgentSpec extends Specification {
       0 * _
     }
 
-    accountCredentialsRepository = Mock(MapBackedCredentialsRepository) {
+    credentialsRepository = Mock(CredentialsRepository) {
       1 * getAll() >> [test]
       0 * _
     }
 
-    agent = new CleanupAlarmsAgent(amazonClientProvider, accountCredentialsRepository, 10L, 10L, 90)
+    agent = new CleanupAlarmsAgent(amazonClientProvider, credentialsRepository, 10L, 10L, 90)
   }
 
   void "should run across all regions/accounts and delete in each"() {

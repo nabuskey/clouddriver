@@ -16,9 +16,7 @@
 
 package com.netflix.spinnaker.clouddriver.aws.provider.config
 
-
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import com.netflix.spinnaker.cats.agent.Agent
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsProvider
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials
 import com.netflix.spinnaker.clouddriver.model.ReservationReport
@@ -27,10 +25,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.DependsOn
-import org.springframework.context.annotation.Lazy
 
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 

@@ -21,7 +21,6 @@ import com.amazonaws.retry.RetryPolicy.RetryCondition
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.netflix.awsobjectmapper.AmazonObjectMapperConfigurer
 import com.netflix.spectator.api.Registry
-import com.netflix.spinnaker.cats.agent.Agent
 import com.netflix.spinnaker.clouddriver.aws.AwsConfigurationProperties
 import com.netflix.spinnaker.clouddriver.aws.deploy.BlockDeviceConfig
 import com.netflix.spinnaker.clouddriver.aws.deploy.handlers.BasicAmazonDeployHandler
@@ -44,7 +43,6 @@ import com.netflix.spinnaker.clouddriver.aws.services.RegionScopedProviderFactor
 import com.netflix.spinnaker.clouddriver.core.limits.ServiceLimitConfiguration
 import com.netflix.spinnaker.clouddriver.event.SpinnakerEvent
 import com.netflix.spinnaker.clouddriver.saga.config.SagaAutoConfiguration
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository
 import com.netflix.spinnaker.credentials.CredentialsRepository
 import com.netflix.spinnaker.kork.aws.AwsComponents
 import com.netflix.spinnaker.kork.aws.bastion.BastionConfig
@@ -57,8 +55,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.*
-
-import java.util.concurrent.ConcurrentHashMap
 
 @Configuration
 @ConditionalOnProperty('aws.enabled')
@@ -183,7 +179,7 @@ class AwsConfiguration {
   @DependsOn('amazonCredentialsRepository')
   BasicAmazonDeployHandler basicAmazonDeployHandler(
     RegionScopedProviderFactory regionScopedProviderFactory,
-    CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository,
+    CredentialsRepository<NetflixAmazonCredentials> credentialsRepository,
     DeployDefaults deployDefaults,
     ScalingPolicyCopier scalingPolicyCopier,
     BlockDeviceConfig blockDeviceConfig,
@@ -192,7 +188,7 @@ class AwsConfiguration {
   ) {
     new BasicAmazonDeployHandler(
       regionScopedProviderFactory,
-      accountCredentialsRepository,
+      credentialsRepository,
       amazonServerGroupProvider,
       deployDefaults,
       scalingPolicyCopier,
@@ -216,9 +212,9 @@ class AwsConfiguration {
   @DependsOn('amazonCredentialsRepository')
   SecurityGroupLookupFactory securityGroupLookup(
     AmazonClientProvider amazonClientProvider,
-    CredentialsRepository<NetflixAmazonCredentials> accountCredentialsRepository
+    CredentialsRepository<NetflixAmazonCredentials> credentialsRepository
   ) {
-    new SecurityGroupLookupFactory(amazonClientProvider, accountCredentialsRepository)
+    new SecurityGroupLookupFactory(amazonClientProvider, credentialsRepository)
   }
 
   @Bean
