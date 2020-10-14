@@ -76,8 +76,8 @@ public class AmazonCredentialsLifecycleHandler
   private final DeployDefaults deployDefaults;
   private final CredentialsRepository<NetflixAmazonCredentials>
       credentialsRepository; // Circular dependency.
-  private Set<String> publicRegions = new HashSet<>();
-  private Set<String> awsInfraRegions = new HashSet<>();
+  protected Set<String> publicRegions = new HashSet<>();
+  protected Set<String> awsInfraRegions = new HashSet<>();
 
   @Override
   public void credentialsAdded(@NotNull NetflixAmazonCredentials credentials) {
@@ -97,8 +97,6 @@ public class AmazonCredentialsLifecycleHandler
   }
 
   private void replaceCurrentImageCachingAgent(NetflixAmazonCredentials credentials) {
-    String a = awsProvider.getProviderName();
-    Collection<Agent> l = awsProvider.getAgents();
     List<ImageCachingAgent> currentImageCachingAgents =
         awsProvider.getAgents().stream()
             .filter(

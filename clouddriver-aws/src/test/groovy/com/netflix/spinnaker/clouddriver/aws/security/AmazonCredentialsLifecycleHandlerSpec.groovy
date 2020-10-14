@@ -24,11 +24,9 @@ import com.netflix.spinnaker.clouddriver.aws.provider.AwsCleanupProvider
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsInfrastructureProvider
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsProvider
 import com.netflix.spinnaker.clouddriver.aws.provider.agent.ImageCachingAgent
-import com.netflix.spinnaker.clouddriver.aws.provider.agent.InstanceCachingAgent
 import com.netflix.spinnaker.credentials.CredentialsRepository
 import spock.lang.Shared
 import spock.lang.Specification
-import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentialsLifecycleHandler
 
 class AmazonCredentialsLifecycleHandlerSpec extends Specification {
   @Shared
@@ -39,36 +37,25 @@ class AmazonCredentialsLifecycleHandlerSpec extends Specification {
   def awsInfrastructureProvider = Spy(AwsInfrastructureProvider) {
     removeAgentsForAccounts(_) >> void
   }
-//  @Shared
-//  def awsProvider = Mock(AwsProvider) {
-//    removeAgentsForAccounts() >> void
-//  }
+  @Shared
+  def objectMapper = Mock(ObjectMapper) {
+    enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) >> Mock(ObjectMapper)
+  }
+  @Shared
+  def credOne = TestCredential.named('one')
+  @Shared
+  def credTwo = TestCredential.named('two')
+  @Shared
+  def credentialsRepository = Mock(CredentialsRepository) {
+    getAll() >> [credOne, credTwo]
+  }
 
 
   def 'it should replace current public image caching agent'() {
-    def objectMapper = Mock(ObjectMapper) {
-      enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS) >> Mock(ObjectMapper)
-    }
-    def credOne = TestCredential.named('one')
-    def credTwo = TestCredential.named('two')
-    def imageCachingAgentOne = Mock(ImageCachingAgent) {
-      handlesAccount("one") >> true
-      getIncludePublicImages() >> true
-      getRegion() >> "us-west-2"
-    }
-    def imageCachingAgentTwo = new ImageCachingAgent(null, credTwo, "us-west-2", objectMapper, null, false, null)
-//    def imageCachingAgentTwo = Mock(ImageCachingAgent) {
-//      handlesAccount("two") >> true
-//      getIncludePublicImages() >> false
-//    }
-    AwsProvider awsProvider = GroovyMock(global: true) {
-      removeAgentsForAccounts(_) >> void
-      getAgents() >> [imageCachingAgentOne, imageCachingAgentTwo]
-      getProviderName() >> "test"
-    }
-    def credentialsRepository = Mock(CredentialsRepository) {
-      getAll() >> [credOne, credTwo]
-    }
+    def imageCachingAgentOne = new ImageCachingAgent(null, credOne, "us-east-1", objectMapper, null, true, null)
+    def imageCachingAgentTwo = new ImageCachingAgent(null, credTwo, "us-east-1", objectMapper, null, false, null)
+    def awsProvider = new AwsProvider(credentialsRepository)
+    awsProvider.addAgents([imageCachingAgentOne, imageCachingAgentTwo])
     def handler = new AmazonCredentialsLifecycleHandler(awsCleanupProvider, awsInfrastructureProvider, awsProvider,
       null, null, null, null, null, null, null, null, null, null, null, null, null, null,
       credentialsRepository)
@@ -80,4 +67,20 @@ class AmazonCredentialsLifecycleHandlerSpec extends Specification {
     imageCachingAgentTwo.includePublicImages
   }
 
+  def 'it should remove region not used by public image caching agent'() {
+    def imageCachingAgentOne = new ImageCachingAgent(null, credOne, "us-west-2", objectMapper, null, true, null)
+    def imageCachingAgentTwo = new ImageCachingAgent(null, credTwo, "us-east-1", objectMapper, null, false, null)
+    def awsProvider = new AwsProvider(credentialsRepository)
+    awsProvider.addAgents([imageCachingAgentOne, imageCachingAgentTwo])
+    def handler = new AmazonCredentialsLifecycleHandler(awsCleanupProvider, awsInfrastructureProvider, awsProvider,
+      null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+      credentialsRepository)
+    handler.publicRegions.add("us-west-2")
+
+    when:
+    handler.credentialsDeleted(credOne)
+
+    then:
+    !handler.publicRegions.contains("us-west-2")
+  }
 }
