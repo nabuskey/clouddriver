@@ -27,7 +27,7 @@ import com.netflix.spinnaker.clouddriver.aws.edda.EddaApiFactory;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsCleanupProvider;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsInfrastructureProvider;
 import com.netflix.spinnaker.clouddriver.aws.provider.AwsProvider;
-import com.netflix.spinnaker.clouddriver.aws.provider.agent.ReservationReportCachingAgent;
+import com.netflix.spinnaker.clouddriver.aws.provider.agent.ImageCachingAgent;
 import com.netflix.spinnaker.clouddriver.aws.provider.config.ProviderHelpers;
 import com.netflix.spinnaker.clouddriver.aws.provider.view.AmazonS3DataProvider;
 import com.netflix.spinnaker.config.AwsConfiguration.DeployDefaults;
@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -74,31 +75,74 @@ public class AmazonCredentialsLifecycleHandler
   private final DynamicConfigService dynamicConfigService;
   private final DeployDefaults deployDefaults;
   private final CredentialsRepository<NetflixAmazonCredentials>
-      accountCredentialsRepository; // Circular dependency.
+      credentialsRepository; // Circular dependency.
   private Set<String> publicRegions = new HashSet<>();
   private Set<String> awsInfraRegions = new HashSet<>();
 
   @Override
   public void credentialsAdded(@NotNull NetflixAmazonCredentials credentials) {
     scheduleAgents(credentials);
-    synchronizeReservationReportCachingAgentAccounts(credentials, true);
   }
 
   @Override
   public void credentialsUpdated(@NotNull NetflixAmazonCredentials credentials) {
-    // TODO(nimak) - ensure that unscheduling does what is exptected in removing the right agents
-    // TODO - this is to be tested against the old behavior
     unscheduleAgents(credentials);
     scheduleAgents(credentials);
-    synchronizeReservationReportCachingAgentAccounts(credentials, true);
   }
 
   @Override
-  public void credentialsDeleted(NetflixAmazonCredentials credentials) {
-    // TODO(nimak) - ensure that unscheduling does what is exptected in removing the right agents
-    // TODO - this is to be tested against the old behavior
+  public void credentialsDeleted(@NotNull NetflixAmazonCredentials credentials) {
+    replaceCurrentImageCachingAgent(credentials);
     unscheduleAgents(credentials);
-    synchronizeReservationReportCachingAgentAccounts(credentials, false);
+  }
+
+  private void replaceCurrentImageCachingAgent(NetflixAmazonCredentials credentials) {
+    String a = awsProvider.getProviderName();
+    Collection<Agent> l = awsProvider.getAgents();
+    List<ImageCachingAgent> currentImageCachingAgents =
+        awsProvider.getAgents().stream()
+            .filter(
+                agent ->
+                    agent.handlesAccount(credentials.getName())
+                        && agent instanceof ImageCachingAgent
+                        && ((ImageCachingAgent) agent).getIncludePublicImages())
+            .map(agent -> (ImageCachingAgent) agent)
+            .collect(Collectors.toList());
+
+    for (ImageCachingAgent imageCachingAgent : currentImageCachingAgents) {
+      boolean found = false;
+      List<NetflixAmazonCredentials> replacementCredentials =
+          credentialsRepository.getAll().stream()
+              .filter(
+                  cred ->
+                      cred.getRegions().stream()
+                          .map(AmazonCredentials.AWSRegion::getName)
+                          .collect(Collectors.toSet())
+                          .contains(imageCachingAgent.getRegion()))
+              .collect(Collectors.toList());
+      for (NetflixAmazonCredentials creds : replacementCredentials) {
+        ImageCachingAgent nextPublicImageCahcingAgent =
+            awsProvider.getAgents().stream()
+                .filter(
+                    agent ->
+                        agent.handlesAccount(creds.getName())
+                            && agent instanceof ImageCachingAgent
+                            && !((ImageCachingAgent) agent)
+                                .getAccountName()
+                                .equals(credentials.getName()))
+                .map(agent -> (ImageCachingAgent) agent)
+                .findFirst()
+                .orElse(null);
+        if (nextPublicImageCahcingAgent != null) {
+          nextPublicImageCahcingAgent.setIncludePublicImages(true);
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        publicRegions.remove(imageCachingAgent.getRegion());
+      }
+    }
   }
 
   private void unscheduleAgents(NetflixAmazonCredentials credentials) {
@@ -118,7 +162,7 @@ public class AmazonCredentialsLifecycleHandler
         ProviderHelpers.buildAwsInfrastructureAgents(
             credentials,
             awsInfrastructureProvider,
-            accountCredentialsRepository,
+            credentialsRepository,
             amazonClientProvider,
             amazonObjectMapper,
             registry,
@@ -129,11 +173,10 @@ public class AmazonCredentialsLifecycleHandler
   }
 
   private void scheduleAWSProviderAgents(NetflixAmazonCredentials credentials) {
-    // parallel safe?
     ProviderHelpers.BuildResult buildResult =
         ProviderHelpers.buildAwsProviderAgents(
             credentials,
-            accountCredentialsRepository,
+            credentialsRepository,
             amazonClientProvider,
             objectMapper,
             registry,
@@ -157,30 +200,12 @@ public class AmazonCredentialsLifecycleHandler
     List<Agent> newlyAddedAgents =
         ProviderHelpers.buildAwsCleanupAgents(
             credentials,
-            accountCredentialsRepository,
+            credentialsRepository,
             amazonClientProvider,
             awsCleanupProvider,
             deployDefaults,
             awsConfigurationProperties);
 
     awsCleanupProvider.addAgents(newlyAddedAgents);
-  }
-
-  private void synchronizeReservationReportCachingAgentAccounts(
-      NetflixAmazonCredentials credentials, boolean add) {
-    ReservationReportCachingAgent reservationReportCachingAgent =
-        awsProvider.getAgents().stream()
-            .filter(agent -> agent instanceof ReservationReportCachingAgent)
-            .map(ReservationReportCachingAgent.class::cast)
-            .findFirst()
-            .orElse(null);
-    if (reservationReportCachingAgent != null) {
-      reservationReportCachingAgent
-          .getAccounts()
-          .removeIf(it -> it.getName().equals(credentials.getName()));
-      if (add) {
-        reservationReportCachingAgent.getAccounts().add(credentials);
-      }
-    }
   }
 }

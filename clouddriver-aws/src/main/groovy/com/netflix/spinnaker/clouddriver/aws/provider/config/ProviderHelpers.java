@@ -145,9 +145,8 @@ public class ProviderHelpers {
             new LaunchConfigCachingAgent(
                 amazonClientProvider, credentials, region.getName(), objectMapper, registry));
         boolean publicImages = false;
-        if (!publicRegions.contains(region.getName())) {
+        if (publicRegions.add(region.getName())) {
           publicImages = true;
-          publicRegions.add(region.getName());
         }
         newlyAddedAgents.add(
             new ImageCachingAgent(
