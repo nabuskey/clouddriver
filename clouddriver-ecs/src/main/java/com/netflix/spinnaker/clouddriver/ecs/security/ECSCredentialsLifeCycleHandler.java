@@ -38,6 +38,7 @@ import com.netflix.spinnaker.clouddriver.ecs.provider.agent.TargetHealthCachingA
 import com.netflix.spinnaker.clouddriver.ecs.provider.agent.TaskCachingAgent;
 import com.netflix.spinnaker.clouddriver.ecs.provider.agent.TaskDefinitionCachingAgent;
 import com.netflix.spinnaker.clouddriver.ecs.provider.agent.TaskHealthCachingAgent;
+import com.netflix.spinnaker.clouddriver.ecs.provider.view.EcsAccountMapper;
 import com.netflix.spinnaker.clouddriver.security.ProviderUtils;
 import com.netflix.spinnaker.credentials.CredentialsLifecycleHandler;
 import java.util.Collections;
@@ -47,11 +48,13 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@Lazy
 public class ECSCredentialsLifeCycleHandler
     implements CredentialsLifecycleHandler<NetflixECSCredentials> {
   protected final EcsProvider ecsProvider;
@@ -61,6 +64,7 @@ public class ECSCredentialsLifeCycleHandler
   protected final IamPolicyReader iamPolicyReader;
   protected final ObjectMapper objectMapper;
   protected final CatsModule catsModule;
+  protected final EcsAccountMapper ecsAccountMapper;
 
   @Override
   public void credentialsAdded(@NotNull NetflixECSCredentials credentials) {
@@ -76,6 +80,7 @@ public class ECSCredentialsLifeCycleHandler
   @Override
   public void credentialsDeleted(NetflixECSCredentials credentials) {
     ecsProvider.removeAgentsForAccounts(Collections.singleton(credentials.getName()));
+    ecsAccountMapper.removeMapEntry(credentials.getName());
   }
 
   private void scheduleAgents(NetflixECSCredentials credentials) {

@@ -16,70 +16,66 @@
 
 package com.netflix.spinnaker.clouddriver.ecs.provider.view;
 
+import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
-import com.netflix.spinnaker.clouddriver.ecs.security.NetflixAssumeRoleEcsCredentials;
+import com.netflix.spinnaker.clouddriver.ecs.security.ECSCredentialsConfig;
 import com.netflix.spinnaker.clouddriver.ecs.security.NetflixECSCredentials;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
-import java.util.Collection;
+import com.netflix.spinnaker.credentials.CompositeCredentialsRepository;
+import com.netflix.spinnaker.credentials.CredentialsRepository;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
-// @DependsOn("netflixECSCredentials")
+@Lazy
 public class EcsAccountMapper {
 
-  final AccountCredentialsProvider accountCredentialsProvider;
-  final Map<String, NetflixAssumeRoleEcsCredentials> ecsCredentialsMap;
-  final Map<String, NetflixAmazonCredentials> awsCredentialsMap;
+  final CredentialsRepository<NetflixECSCredentials> credentialsRepository;
+  final CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository;
+  protected final Map<String, String> ecsCredentialsMap;
+  protected final Map<String, String> awsCredentialsMap;
 
   @Autowired
-  public EcsAccountMapper(AccountCredentialsProvider accountCredentialsProvider) {
-    this.accountCredentialsProvider = accountCredentialsProvider;
-
-    Set<? extends AccountCredentials> allAccounts = accountCredentialsProvider.getAll();
-
-    Collection<NetflixAssumeRoleEcsCredentials> ecsAccounts =
-        (Collection<NetflixAssumeRoleEcsCredentials>)
-            allAccounts.stream()
-                .filter(credentials -> credentials instanceof NetflixAssumeRoleEcsCredentials)
-                .collect(Collectors.toSet());
+  public EcsAccountMapper(
+      CredentialsRepository<NetflixECSCredentials> credentialsRepository,
+      CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository) {
+    this.credentialsRepository = credentialsRepository;
+    this.compositeCredentialsRepository = compositeCredentialsRepository;
 
     ecsCredentialsMap = new HashMap<>();
     awsCredentialsMap = new HashMap<>();
+  }
 
-    for (NetflixAssumeRoleEcsCredentials ecsAccount : ecsAccounts) {
-      ecsCredentialsMap.put(ecsAccount.getAwsAccount(), ecsAccount);
+  public void addMapEntry(ECSCredentialsConfig.@NotNull ECSAccount account) {
+    ecsCredentialsMap.put(account.getAwsAccount(), account.getName());
+    awsCredentialsMap.put(account.getName(), account.getAwsAccount());
+  }
 
-      allAccounts.stream()
-          .filter(credentials -> credentials.getName().equals(ecsAccount.getAwsAccount()))
-          .findFirst()
-          .ifPresent(
-              v -> awsCredentialsMap.put(ecsAccount.getName(), (NetflixAmazonCredentials) v));
-    }
+  public void removeMapEntry(String ecsAccountName) {
+    ecsCredentialsMap.remove(awsCredentialsMap.get(ecsAccountName));
+    awsCredentialsMap.remove(ecsAccountName);
   }
 
   public NetflixECSCredentials fromAwsAccountNameToEcs(String awsAccountName) {
-    return ecsCredentialsMap.get(awsAccountName);
+    return credentialsRepository.getOne(ecsCredentialsMap.get(awsAccountName));
   }
 
   public NetflixAmazonCredentials fromEcsAccountNameToAws(String ecsAccountName) {
-    return awsCredentialsMap.get(ecsAccountName);
+    return (NetflixAmazonCredentials)
+        compositeCredentialsRepository.getCredentials(
+            awsCredentialsMap.get(ecsAccountName), AmazonCloudProvider.ID);
   }
 
   public String fromAwsAccountNameToEcsAccountName(String awsAccountName) {
-    return ecsCredentialsMap.containsKey(awsAccountName)
-        ? ecsCredentialsMap.get(awsAccountName).getName()
-        : null;
+    return ecsCredentialsMap.get(awsAccountName);
   }
 
   public String fromEcsAccountNameToAwsAccountName(String ecsAccountName) {
-    return awsCredentialsMap.containsKey(ecsAccountName)
-        ? awsCredentialsMap.get(ecsAccountName).getName()
-        : null;
+    return awsCredentialsMap.get(ecsAccountName);
   }
 }

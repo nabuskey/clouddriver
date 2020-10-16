@@ -22,18 +22,21 @@ import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAssumeRoleAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsConfig;
 import com.netflix.spinnaker.clouddriver.ecs.provider.EcsProvider;
+import com.netflix.spinnaker.clouddriver.ecs.provider.view.EcsAccountMapper;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
 import com.netflix.spinnaker.credentials.CompositeCredentialsRepository;
 import com.netflix.spinnaker.credentials.definition.CredentialsParser;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.annotation.Lazy;
 
 @AllArgsConstructor
 public class ECSCredentialsParser<T extends NetflixAmazonCredentials>
     implements CredentialsParser<ECSCredentialsConfig.ECSAccount, NetflixECSCredentials> {
 
-  private CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository;
-  private CredentialsParser<CredentialsConfig.Account, NetflixAmazonCredentials> parser;
+  private final CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository;
+  @Lazy private final EcsAccountMapper ecsAccountMapper;
+  private final CredentialsParser<CredentialsConfig.Account, NetflixAmazonCredentials> parser;
 
   @Override
   public NetflixECSCredentials parse(ECSCredentialsConfig.@NotNull ECSAccount credentials) {
@@ -51,8 +54,11 @@ public class ECSCredentialsParser<T extends NetflixAmazonCredentials>
     CredentialsConfig.Account account =
         EcsAccountBuilder.build(netflixAmazonCredentials, credentials.getName(), EcsProvider.NAME);
     try {
-      return new NetflixAssumeRoleEcsCredentials(
-          (NetflixAssumeRoleAmazonCredentials) parser.parse(account), credentials.getName());
+      NetflixECSCredentials newCreds =
+          new NetflixAssumeRoleEcsCredentials(
+              (NetflixAssumeRoleAmazonCredentials) parser.parse(account), credentials.getName());
+      ecsAccountMapper.addMapEntry(credentials);
+      return newCreds;
     } catch (Throwable throwable) {
       throwable.printStackTrace();
       return null;
