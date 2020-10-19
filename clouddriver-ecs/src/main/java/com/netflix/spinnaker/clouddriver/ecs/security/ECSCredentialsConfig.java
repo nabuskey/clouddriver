@@ -22,10 +22,10 @@ import lombok.Data;
 
 @Data
 public class ECSCredentialsConfig {
-  List<ECSAccount> accounts;
+  List<Account> accounts;
 
   @Data
-  public static class ECSAccount implements CredentialsDefinition {
+  public static class Account implements CredentialsDefinition {
     private String name;
     private String awsAccount;
   }

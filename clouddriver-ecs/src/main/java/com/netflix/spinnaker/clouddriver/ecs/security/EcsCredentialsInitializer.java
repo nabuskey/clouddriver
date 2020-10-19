@@ -59,7 +59,7 @@ public class EcsCredentialsInitializer {
 
   @Bean
   @DependsOn("amazonCredentialsLoader")
-  CredentialsParser<ECSCredentialsConfig.ECSAccount, NetflixECSCredentials> ecsCredentialsParser(
+  CredentialsParser<ECSCredentialsConfig.Account, NetflixECSCredentials> ecsCredentialsParser(
       CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository,
       EcsAccountMapper ecsAccountMapper,
       CredentialsParser<CredentialsConfig.Account, NetflixAmazonCredentials>
@@ -71,11 +71,11 @@ public class EcsCredentialsInitializer {
   @Bean
   @DependsOn("ecsCredentialsParser")
   AbstractCredentialsLoader<NetflixECSCredentials> ecsCredentialsLoader(
-      CredentialsParser<ECSCredentialsConfig.ECSAccount, NetflixECSCredentials>
+      CredentialsParser<ECSCredentialsConfig.Account, NetflixECSCredentials>
           amazonCredentialsParser,
       CredentialsRepository<NetflixECSCredentials> repository,
       ECSCredentialsConfig ecsCredentialsConfig,
-      @Nullable CredentialsDefinitionSource<ECSCredentialsConfig.ECSAccount> ecsCredentialsSource) {
+      @Nullable CredentialsDefinitionSource<ECSCredentialsConfig.Account> ecsCredentialsSource) {
     if (ecsCredentialsSource == null) {
       ecsCredentialsSource = ecsCredentialsConfig::getAccounts;
     }

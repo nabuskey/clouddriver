@@ -32,14 +32,14 @@ import org.springframework.context.annotation.Lazy;
 
 @AllArgsConstructor
 public class ECSCredentialsParser<T extends NetflixAmazonCredentials>
-    implements CredentialsParser<ECSCredentialsConfig.ECSAccount, NetflixECSCredentials> {
+    implements CredentialsParser<ECSCredentialsConfig.Account, NetflixECSCredentials> {
 
   private final CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository;
   @Lazy private final EcsAccountMapper ecsAccountMapper;
   private final CredentialsParser<CredentialsConfig.Account, NetflixAmazonCredentials> parser;
 
   @Override
-  public NetflixECSCredentials parse(ECSCredentialsConfig.@NotNull ECSAccount credentials) {
+  public NetflixECSCredentials parse(ECSCredentialsConfig.@NotNull Account credentials) {
     NetflixAmazonCredentials netflixAmazonCredentials;
     try {
       netflixAmazonCredentials =

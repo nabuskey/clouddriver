@@ -23,7 +23,6 @@ import com.netflix.spinnaker.clouddriver.ecs.security.NetflixECSCredentials;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
 import com.netflix.spinnaker.credentials.CompositeCredentialsRepository;
 import com.netflix.spinnaker.credentials.CredentialsRepository;
-import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
@@ -51,7 +50,7 @@ public class EcsAccountMapper {
     awsCredentialsMap = new HashMap<>();
   }
 
-  public void addMapEntry(ECSCredentialsConfig.@NotNull ECSAccount account) {
+  public void addMapEntry(ECSCredentialsConfig.@NotNull Account account) {
     ecsCredentialsMap.put(account.getAwsAccount(), account.getName());
     awsCredentialsMap.put(account.getName(), account.getAwsAccount());
   }

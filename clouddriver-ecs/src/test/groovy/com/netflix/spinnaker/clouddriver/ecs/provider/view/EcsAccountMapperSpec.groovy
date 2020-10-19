@@ -34,7 +34,7 @@ class EcsAccountMapperSpec extends Specification {
     getName() >> ecsAccountName
     getAwsAccount() >> awsAccountName
   }
-  def ecsAccountConfig = new ECSCredentialsConfig.ECSAccount() {{
+  def ecsAccountConfig = new ECSCredentialsConfig.Account() {{
     setAwsAccount(awsAccountName)
     setName(ecsAccountName)
   }}

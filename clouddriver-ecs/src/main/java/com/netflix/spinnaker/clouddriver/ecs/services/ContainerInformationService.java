@@ -243,9 +243,9 @@ public class ContainerInformationService {
   }
 
   private String getAwsAccountName(String ecsAccountName) {
-    for (ECSCredentialsConfig.ECSAccount ecsAccount : ecsCredentialsConfig.getAccounts()) {
-      if (ecsAccount.getName().equals(ecsAccountName)) {
-        return ecsAccount.getAwsAccount();
+    for (ECSCredentialsConfig.Account account : ecsCredentialsConfig.getAccounts()) {
+      if (account.getName().equals(ecsAccountName)) {
+        return account.getAwsAccount();
       }
     }
     return null;
