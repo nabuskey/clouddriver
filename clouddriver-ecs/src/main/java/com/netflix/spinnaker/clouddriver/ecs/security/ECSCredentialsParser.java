@@ -56,7 +56,8 @@ public class ECSCredentialsParser<T extends NetflixAmazonCredentials>
     try {
       NetflixECSCredentials newCreds =
           new NetflixAssumeRoleEcsCredentials(
-              (NetflixAssumeRoleAmazonCredentials) parser.parse(account), credentials.getName());
+              (NetflixAssumeRoleAmazonCredentials) parser.parse(account),
+              credentials.getAwsAccount());
       ecsAccountMapper.addMapEntry(credentials);
       return newCreds;
     } catch (Throwable throwable) {

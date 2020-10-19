@@ -37,21 +37,19 @@ import com.netflix.spinnaker.clouddriver.ecs.model.EcsServerCluster;
 import com.netflix.spinnaker.clouddriver.ecs.model.EcsServerGroup;
 import com.netflix.spinnaker.clouddriver.ecs.model.EcsTask;
 import com.netflix.spinnaker.clouddriver.ecs.model.TaskDefinition;
+import com.netflix.spinnaker.clouddriver.ecs.security.NetflixECSCredentials;
 import com.netflix.spinnaker.clouddriver.ecs.services.ContainerInformationService;
 import com.netflix.spinnaker.clouddriver.ecs.services.SubnetSelector;
 import com.netflix.spinnaker.clouddriver.model.ClusterProvider;
 import com.netflix.spinnaker.clouddriver.model.Instance;
 import com.netflix.spinnaker.clouddriver.model.LoadBalancer;
 import com.netflix.spinnaker.clouddriver.model.ServerGroup;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
-import java.util.ArrayList;
+import com.netflix.spinnaker.credentials.CredentialsRepository;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -69,7 +67,7 @@ public class EcsServerClusterProvider implements ClusterProvider<EcsServerCluste
   private final TaskDefinitionCacheClient taskDefinitionCacheClient;
   private final EcsLoadbalancerCacheClient ecsLoadbalancerCacheClient;
   private final EcsCloudWatchAlarmCacheClient ecsCloudWatchAlarmCacheClient;
-  private final AccountCredentialsProvider accountCredentialsProvider;
+  private final CredentialsRepository<NetflixECSCredentials> credentialsRepository;
   private final ContainerInformationService containerInformationService;
   private final SubnetSelector subnetSelector;
 
@@ -77,7 +75,7 @@ public class EcsServerClusterProvider implements ClusterProvider<EcsServerCluste
 
   @Autowired
   public EcsServerClusterProvider(
-      AccountCredentialsProvider accountCredentialsProvider,
+      CredentialsRepository<NetflixECSCredentials> credentialsRepository,
       ContainerInformationService containerInformationService,
       SubnetSelector subnetSelector,
       TaskCacheClient taskCacheClient,
@@ -86,7 +84,7 @@ public class EcsServerClusterProvider implements ClusterProvider<EcsServerCluste
       EcsLoadbalancerCacheClient ecsLoadbalancerCacheClient,
       TaskDefinitionCacheClient taskDefinitionCacheClient,
       EcsCloudWatchAlarmCacheClient ecsCloudWatchAlarmCacheClient) {
-    this.accountCredentialsProvider = accountCredentialsProvider;
+    this.credentialsRepository = credentialsRepository;
     this.containerInformationService = containerInformationService;
     this.subnetSelector = subnetSelector;
     this.taskCacheClient = taskCacheClient;
@@ -436,29 +434,6 @@ public class EcsServerClusterProvider implements ClusterProvider<EcsServerCluste
     return instanceCounts;
   }
 
-  private List<AmazonCredentials> getEcsCredentials() {
-    List<AmazonCredentials> ecsCredentialsList = new ArrayList<>();
-    for (AccountCredentials credentials : accountCredentialsProvider.getAll()) {
-      if (credentials instanceof AmazonCredentials
-          && credentials.getCloudProvider().equals(EcsCloudProvider.ID)) {
-        ecsCredentialsList.add((AmazonCredentials) credentials);
-      }
-    }
-    return ecsCredentialsList;
-  }
-
-  private AmazonCredentials getEcsCredentials(String account) {
-    try {
-      return getEcsCredentials().stream()
-          .filter(credentials -> credentials.getName().equals(account))
-          .findFirst()
-          .get();
-    } catch (NoSuchElementException exception) {
-      throw new NoSuchElementException(
-          String.format("There is no ECS account by the name of '%s'", account));
-    }
-  }
-
   @Override
   public Map<String, Set<EcsServerCluster>> getClusterSummaries(String application) {
     return getClusters();
@@ -468,7 +443,7 @@ public class EcsServerClusterProvider implements ClusterProvider<EcsServerCluste
   public Map<String, Set<EcsServerCluster>> getClusterDetails(String application) {
     Map<String, Set<EcsServerCluster>> clusterMap = new HashMap<>();
 
-    for (AmazonCredentials credentials : getEcsCredentials()) {
+    for (AmazonCredentials credentials : credentialsRepository.getAll()) {
       clusterMap = findClusters(clusterMap, credentials, application);
     }
 
@@ -479,7 +454,7 @@ public class EcsServerClusterProvider implements ClusterProvider<EcsServerCluste
   public Map<String, Set<EcsServerCluster>> getClusters() {
     Map<String, Set<EcsServerCluster>> clusterMap = new HashMap<>();
 
-    for (AmazonCredentials credentials : getEcsCredentials()) {
+    for (AmazonCredentials credentials : credentialsRepository.getAll()) {
       clusterMap = findClusters(clusterMap, credentials);
     }
     return clusterMap;
@@ -488,13 +463,12 @@ public class EcsServerClusterProvider implements ClusterProvider<EcsServerCluste
   /** Gets Spinnaker clusters for a given Spinnaker application and ECS account. */
   @Override
   public Set<EcsServerCluster> getClusters(String application, String account) {
-    try {
-      AmazonCredentials credentials = getEcsCredentials(account);
-      return findClusters(new HashMap<>(), credentials, application).get(application);
-    } catch (NoSuchElementException exception) {
+    AmazonCredentials credentials = credentialsRepository.getOne(account);
+    if (credentials == null) {
       log.info("No ECS Credentials were found for account " + account);
       return null;
     }
+    return findClusters(new HashMap<>(), credentials, application).get(application);
   }
 
   /**
@@ -537,17 +511,12 @@ public class EcsServerClusterProvider implements ClusterProvider<EcsServerCluste
     // TODO - remove the application filter.
     String application = StringUtils.substringBefore(serverGroupName, "-");
     Map<String, Set<EcsServerCluster>> clusterMap = new HashMap<>();
-
-    try {
-      AmazonCredentials credentials = getEcsCredentials(account);
-      clusterMap = findClusters(clusterMap, credentials, application);
-    } catch (NoSuchElementException exception) {
-      /* This is ugly, but not sure how else to do it. If we don't have creds due
-       *  to not being an ECS account, there's nothing to do here, and we should
-       *  just continue on.
-       */
+    AmazonCredentials credentials = credentialsRepository.getOne(account);
+    if (credentials == null) {
       log.info("No ECS credentials were found for the account " + account);
+      return null;
     }
+    clusterMap = findClusters(clusterMap, credentials, application);
 
     for (Map.Entry<String, Set<EcsServerCluster>> entry : clusterMap.entrySet()) {
       for (EcsServerCluster ecsServerCluster : entry.getValue()) {

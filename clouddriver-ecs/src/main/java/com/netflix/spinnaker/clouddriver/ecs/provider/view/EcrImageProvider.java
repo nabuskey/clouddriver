@@ -28,7 +28,7 @@ import com.netflix.spinnaker.clouddriver.aws.security.AmazonCredentials;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.ecs.model.EcsDockerImage;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
+import com.netflix.spinnaker.credentials.CompositeCredentialsRepository;
 import com.netflix.spinnaker.kork.web.exceptions.NotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,14 +57,14 @@ public class EcrImageProvider implements ImageRepositoryProvider {
 
   private final AmazonClientProvider amazonClientProvider;
 
-  private final AccountCredentialsProvider accountCredentialsProvider;
+  private final CompositeCredentialsRepository<AccountCredentials> credentialsRepository;
 
   @Autowired
   public EcrImageProvider(
       AmazonClientProvider amazonClientProvider,
-      AccountCredentialsProvider accountCredentialsProvider) {
+      CompositeCredentialsRepository<AccountCredentials> credentialsRepository) {
     this.amazonClientProvider = amazonClientProvider;
-    this.accountCredentialsProvider = accountCredentialsProvider;
+    this.credentialsRepository = credentialsRepository;
   }
 
   @Override
@@ -145,7 +145,7 @@ public class EcrImageProvider implements ImageRepositoryProvider {
   }
 
   private NetflixAmazonCredentials getCredentials(String accountId) {
-    for (AccountCredentials credentials : accountCredentialsProvider.getAll()) {
+    for (AccountCredentials credentials : credentialsRepository.getAllCredentials()) {
       if (credentials instanceof NetflixAmazonCredentials) {
         NetflixAmazonCredentials amazonCredentials = (NetflixAmazonCredentials) credentials;
         if (amazonCredentials.getAccountId().equals(accountId)) {

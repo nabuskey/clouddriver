@@ -21,11 +21,13 @@ import com.amazonaws.services.applicationautoscaling.model.*;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.cloudwatch.model.*;
 import com.google.common.collect.Iterables;
+import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
 import com.netflix.spinnaker.clouddriver.ecs.cache.client.EcsCloudWatchAlarmCacheClient;
 import com.netflix.spinnaker.clouddriver.ecs.cache.model.EcsMetricAlarm;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
+import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
+import com.netflix.spinnaker.credentials.CompositeCredentialsRepository;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +39,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EcsCloudMetricService {
   @Autowired EcsCloudWatchAlarmCacheClient metricAlarmCacheClient;
-  @Autowired AccountCredentialsProvider accountCredentialsProvider;
+  @Autowired CompositeCredentialsRepository<AccountCredentials> credentialsRepository;
   @Autowired AmazonClientProvider amazonClientProvider;
 
   private final Logger log = LoggerFactory.getLogger(getClass());
@@ -51,7 +53,8 @@ public class EcsCloudMetricService {
     }
 
     NetflixAmazonCredentials credentials =
-        (NetflixAmazonCredentials) accountCredentialsProvider.getCredentials(account);
+        (NetflixAmazonCredentials)
+            credentialsRepository.getCredentials(account, AmazonCloudProvider.ID);
     AmazonCloudWatch amazonCloudWatch =
         amazonClientProvider.getAmazonCloudWatch(credentials, region, false);
 
@@ -85,7 +88,8 @@ public class EcsCloudMetricService {
 
   private void deregisterScalableTargets(Set<String> resources, String account, String region) {
     NetflixAmazonCredentials credentials =
-        (NetflixAmazonCredentials) accountCredentialsProvider.getCredentials(account);
+        (NetflixAmazonCredentials)
+            credentialsRepository.getCredentials(account, AmazonCloudProvider.ID);
     AWSApplicationAutoScaling autoScaling =
         amazonClientProvider.getAmazonApplicationAutoScaling(credentials, region, false);
 
@@ -260,9 +264,11 @@ public class EcsCloudMetricService {
       String srcResourceId,
       String clusterName) {
     NetflixAmazonCredentials dstCredentials =
-        (NetflixAmazonCredentials) accountCredentialsProvider.getCredentials(dstAccount);
+        (NetflixAmazonCredentials)
+            credentialsRepository.getCredentials(dstAccount, AmazonCloudProvider.ID);
     NetflixAmazonCredentials srcCredentials =
-        (NetflixAmazonCredentials) accountCredentialsProvider.getCredentials(srcAccount);
+        (NetflixAmazonCredentials)
+            credentialsRepository.getCredentials(srcAccount, AmazonCloudProvider.ID);
 
     AWSApplicationAutoScaling dstAutoScalingClient =
         amazonClientProvider.getAmazonApplicationAutoScaling(dstCredentials, dstRegion, false);

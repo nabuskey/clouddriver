@@ -24,7 +24,7 @@ import com.netflix.spinnaker.clouddriver.ecs.model.EcsApplication;
 import com.netflix.spinnaker.clouddriver.model.Application;
 import com.netflix.spinnaker.clouddriver.model.ApplicationProvider;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsProvider;
+import com.netflix.spinnaker.credentials.CompositeCredentialsRepository;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,13 +38,13 @@ import org.springframework.stereotype.Component;
 public class EcsApplicationProvider implements ApplicationProvider {
 
   private final ServiceCacheClient serviceCacheClient;
-  private final AccountCredentialsProvider accountCredentialsProvider;
+  private final CompositeCredentialsRepository<AccountCredentials> credentialsRepository;
 
   @Autowired
   public EcsApplicationProvider(
-      AccountCredentialsProvider accountCredentialsProvider,
+      CompositeCredentialsRepository<AccountCredentials> credentialsRepository,
       @Lazy ServiceCacheClient serviceCacheClient) {
-    this.accountCredentialsProvider = accountCredentialsProvider;
+    this.credentialsRepository = credentialsRepository;
     this.serviceCacheClient = serviceCacheClient;
   }
 
@@ -64,7 +64,7 @@ public class EcsApplicationProvider implements ApplicationProvider {
   public Set<Application> getApplications(boolean expand) {
     Set<Application> applications = new HashSet<>();
 
-    for (AccountCredentials credentials : accountCredentialsProvider.getAll()) {
+    for (AccountCredentials credentials : credentialsRepository.getAllCredentials()) {
       if (credentials instanceof AmazonCredentials) {
         Set<Application> retrievedApplications =
             findApplicationsForAllRegions((AmazonCredentials) credentials, expand);

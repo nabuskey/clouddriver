@@ -35,15 +35,15 @@ import org.springframework.stereotype.Component;
 @Lazy
 public class EcsAccountMapper {
 
-  final CredentialsRepository<NetflixECSCredentials> credentialsRepository;
-  final CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository;
+  @Lazy final CredentialsRepository<NetflixECSCredentials> credentialsRepository;
+  @Lazy final CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository;
   protected final Map<String, String> ecsCredentialsMap;
   protected final Map<String, String> awsCredentialsMap;
 
   @Autowired
   public EcsAccountMapper(
-      CredentialsRepository<NetflixECSCredentials> credentialsRepository,
-      CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository) {
+      @Lazy CredentialsRepository<NetflixECSCredentials> credentialsRepository,
+      @Lazy CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository) {
     this.credentialsRepository = credentialsRepository;
     this.compositeCredentialsRepository = compositeCredentialsRepository;
 
