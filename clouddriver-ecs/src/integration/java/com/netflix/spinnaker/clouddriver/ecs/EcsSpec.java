@@ -27,7 +27,6 @@ import com.netflix.spinnaker.cats.module.CatsModule;
 import com.netflix.spinnaker.clouddriver.Main;
 import com.netflix.spinnaker.clouddriver.aws.security.*;
 import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsConfig;
-import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsLoader;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -69,13 +68,10 @@ public class EcsSpec {
 
   @MockBean protected AmazonClientProvider mockAwsProvider;
 
-  @MockBean AmazonAccountsSynchronizer mockAccountsSyncer;
-
   @BeforeEach
   public void setup() {
     NetflixAmazonCredentials mockAwsCreds = mock(NetflixAmazonCredentials.class);
     when(mockAccountsSyncer.synchronize(
-            any(CredentialsLoader.class),
             any(CredentialsConfig.class),
             any(AccountCredentialsRepository.class),
             any(DefaultAccountConfigurationProperties.class),

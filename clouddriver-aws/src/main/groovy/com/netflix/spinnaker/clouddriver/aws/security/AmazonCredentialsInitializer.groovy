@@ -21,8 +21,6 @@ import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider
 import com.netflix.spinnaker.clouddriver.aws.security.config.AmazonCredentialsParser
 import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsConfig
 import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsConfig.Account
-import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsLoader
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository
 import com.netflix.spinnaker.clouddriver.security.CredentialsInitializerSynchronizable
 import com.netflix.spinnaker.credentials.CredentialsLifecycleHandler
 import com.netflix.spinnaker.credentials.CredentialsRepository
@@ -36,7 +34,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.DependsOn
 import org.springframework.context.annotation.Lazy
 import org.springframework.context.annotation.Primary
 
@@ -65,34 +62,9 @@ class AmazonCredentialsInitializer {
   }
 
   @Bean
-  @ConditionalOnMissingBean(CredentialsLoader.class)
-  CredentialsLoader<? extends NetflixAmazonCredentials> credentialsLoader(AWSCredentialsProvider awsCredentialsProvider,
-                                                                          AmazonClientProvider amazonClientProvider,
-                                                                          Class<? extends NetflixAmazonCredentials> credentialsType) {
-    new CredentialsLoader<? extends NetflixAmazonCredentials>(awsCredentialsProvider, amazonClientProvider, credentialsType)
-  }
-
-  @Bean
-  @ConditionalOnMissingBean(AmazonAccountsSynchronizer.class)
-  AmazonAccountsSynchronizer amazonAccountsSynchronizer() {
-    new DefaultAmazonAccountsSynchronizer()
-  }
-
-  @Bean
-  List<? extends NetflixAmazonCredentials> netflixAmazonCredentials(
-    CredentialsLoader<? extends NetflixAmazonCredentials> credentialsLoader,
-    CredentialsConfig credentialsConfig,
-    AccountCredentialsRepository accountCredentialsRepository,
-    DefaultAccountConfigurationProperties defaultAccountConfigurationProperties,
-    AmazonAccountsSynchronizer amazonAccountsSynchronizer) {
-
-    amazonAccountsSynchronizer.synchronize(credentialsLoader, credentialsConfig, accountCredentialsRepository, defaultAccountConfigurationProperties, null)
-  }
-
-  @Bean
   @ConditionalOnMissingBean(
     value = [Account.class, NetflixAmazonCredentials.class],
-    parameterizedContainer = CredentialsRepository.class
+    parameterizedContainer = CredentialsParser.class
   )
   CredentialsParser<Account, NetflixAmazonCredentials> amazonCredentialsParser(
     AWSCredentialsProvider awsCredentialsProvider,

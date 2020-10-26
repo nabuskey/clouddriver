@@ -25,11 +25,10 @@ import static com.netflix.spinnaker.clouddriver.ecs.cache.Keys.Namespace.TASKS;
 import static com.netflix.spinnaker.clouddriver.ecs.cache.Keys.Namespace.TASK_DEFINITIONS;
 
 import com.netflix.spinnaker.cats.agent.Agent;
-import com.netflix.spinnaker.cats.agent.AgentSchedulerAware;
 import com.netflix.spinnaker.clouddriver.cache.SearchableProvider;
 import com.netflix.spinnaker.clouddriver.core.provider.agent.HealthProvidingCachingAgent;
 import com.netflix.spinnaker.clouddriver.ecs.cache.Keys;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository;
+import com.netflix.spinnaker.clouddriver.security.BaseProvider;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,7 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class EcsProvider extends AgentSchedulerAware implements SearchableProvider {
+public class EcsProvider extends BaseProvider implements SearchableProvider {
   public static final String NAME = EcsProvider.class.getName();
 
   private static final Set<String> defaultCaches =
@@ -56,14 +55,11 @@ public class EcsProvider extends AgentSchedulerAware implements SearchableProvid
   private static final Map<String, String> urlMappingTemplates = new HashMap<>();
 
   private final Collection<Agent> agents;
-  private final AccountCredentialsRepository accountCredentialsRepository;
   private final Keys keys = new Keys();
   private Collection<HealthProvidingCachingAgent> healthAgents;
 
-  public EcsProvider(
-      AccountCredentialsRepository accountCredentialsRepository, Collection<Agent> agents) {
+  public EcsProvider(Collection<Agent> agents) {
     this.agents = agents;
-    this.accountCredentialsRepository = accountCredentialsRepository;
   }
 
   @Override
@@ -91,11 +87,6 @@ public class EcsProvider extends AgentSchedulerAware implements SearchableProvid
   @Override
   public String getProviderName() {
     return NAME;
-  }
-
-  @Override
-  public Collection<Agent> getAgents() {
-    return agents;
   }
 
   public void synchronizeHealthAgents() {
