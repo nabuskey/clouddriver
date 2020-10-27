@@ -64,7 +64,7 @@ class ECSCredentialsParserSpec extends Specification{
     def response = ecsCredentialsParser.parse(account)
 
     then:
-    1 * parser.parse({account.getName() == "one-ecs" } ) >> assumeRoleCred
+    1 * parser.parse({it.getName() == "one-ecs" } ) >> assumeRoleCred
     1 * compositeCredentialsRepository.getCredentials("one", AmazonCloudProvider.ID) >> credOne
     ecsAccountMapper.fromAwsAccountNameToEcsAccountName("one") == "one-ecs"
     response.getName() == "one-ecs"

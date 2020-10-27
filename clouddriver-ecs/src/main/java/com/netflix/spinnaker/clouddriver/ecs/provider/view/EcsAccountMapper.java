@@ -23,8 +23,8 @@ import com.netflix.spinnaker.clouddriver.ecs.security.NetflixECSCredentials;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
 import com.netflix.spinnaker.credentials.CompositeCredentialsRepository;
 import com.netflix.spinnaker.credentials.CredentialsRepository;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -46,8 +46,8 @@ public class EcsAccountMapper {
     this.credentialsRepository = credentialsRepository;
     this.compositeCredentialsRepository = compositeCredentialsRepository;
 
-    ecsCredentialsMap = new HashMap<>();
-    awsCredentialsMap = new HashMap<>();
+    ecsCredentialsMap = new ConcurrentHashMap<>();
+    awsCredentialsMap = new ConcurrentHashMap<>();
   }
 
   public void addMapEntry(ECSCredentialsConfig.@NotNull Account account) {

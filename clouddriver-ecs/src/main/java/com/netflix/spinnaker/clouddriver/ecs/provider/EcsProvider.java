@@ -24,7 +24,6 @@ import static com.netflix.spinnaker.clouddriver.ecs.cache.Keys.Namespace.SERVICE
 import static com.netflix.spinnaker.clouddriver.ecs.cache.Keys.Namespace.TASKS;
 import static com.netflix.spinnaker.clouddriver.ecs.cache.Keys.Namespace.TASK_DEFINITIONS;
 
-import com.netflix.spinnaker.cats.agent.Agent;
 import com.netflix.spinnaker.clouddriver.cache.SearchableProvider;
 import com.netflix.spinnaker.clouddriver.core.provider.agent.HealthProvidingCachingAgent;
 import com.netflix.spinnaker.clouddriver.ecs.cache.Keys;
@@ -53,14 +52,8 @@ public class EcsProvider extends BaseProvider implements SearchableProvider {
               SCALABLE_TARGETS.toString()));
 
   private static final Map<String, String> urlMappingTemplates = new HashMap<>();
-
-  private final Collection<Agent> agents;
   private final Keys keys = new Keys();
   private Collection<HealthProvidingCachingAgent> healthAgents;
-
-  public EcsProvider(Collection<Agent> agents) {
-    this.agents = agents;
-  }
 
   @Override
   public Set<String> getDefaultCaches() {
@@ -92,7 +85,7 @@ public class EcsProvider extends BaseProvider implements SearchableProvider {
   public void synchronizeHealthAgents() {
     healthAgents =
         Collections.unmodifiableCollection(
-            agents.stream()
+            getAgents().stream()
                 .filter(a -> a instanceof HealthProvidingCachingAgent)
                 .map(a -> (HealthProvidingCachingAgent) a)
                 .collect(Collectors.toList()));
