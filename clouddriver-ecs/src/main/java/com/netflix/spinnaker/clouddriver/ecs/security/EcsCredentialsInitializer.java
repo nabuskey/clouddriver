@@ -52,7 +52,7 @@ public class EcsCredentialsInitializer {
   @ConditionalOnMissingBean(
       value = NetflixECSCredentials.class,
       parameterizedContainer = CredentialsRepository.class)
-  CredentialsRepository<NetflixECSCredentials> amazonECSCredentialsRepository(
+  CredentialsRepository<NetflixECSCredentials> ecsCredentialsRepository(
       CredentialsLifecycleHandler<NetflixECSCredentials> eventHandler) {
     return new MapBackedCredentialsRepository<>(EcsCloudProvider.ID, eventHandler);
   }
@@ -86,7 +86,7 @@ public class EcsCredentialsInitializer {
   @ConditionalOnMissingBean(
       value = NetflixECSCredentials.class,
       parameterizedContainer = Poller.class)
-  CredentialsInitializerSynchronizable ECSCredentialsInializerSynchronizable(
+  CredentialsInitializerSynchronizable ecsCredentialsInializerSynchronizable(
       AbstractCredentialsLoader<NetflixECSCredentials> ecsCredentialsLoader) {
     final Poller<NetflixECSCredentials> poller = new Poller<>(ecsCredentialsLoader);
     return new CredentialsInitializerSynchronizable() {
