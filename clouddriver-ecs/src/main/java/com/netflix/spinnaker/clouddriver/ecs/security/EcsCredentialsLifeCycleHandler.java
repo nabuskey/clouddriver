@@ -66,11 +66,9 @@ public class EcsCredentialsLifeCycleHandler
 
   @Override
   public void credentialsAdded(@NotNull NetflixECSCredentials credentials) {
-    // To be implemented once CredentialsRepository is implemented.
-    //    if (credentials instanceof NetflixAssumeRoleEcsCredentials) {
-    //      ecsAccountMapper.addaddMapEntry(((NetflixAssumeRoleEcsCredentials)
-    // credentials).getAwsAccount());
-    //    }
+    if (credentials instanceof NetflixAssumeRoleEcsCredentials) {
+      ecsAccountMapper.addMapEntry(((NetflixAssumeRoleEcsCredentials) credentials));
+    }
     scheduleAgents(credentials);
   }
 

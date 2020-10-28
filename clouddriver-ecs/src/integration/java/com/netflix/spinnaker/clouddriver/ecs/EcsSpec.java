@@ -18,30 +18,39 @@ package com.netflix.spinnaker.clouddriver.ecs;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.netflix.spinnaker.cats.agent.DefaultCacheResult;
 import com.netflix.spinnaker.cats.cache.CacheData;
 import com.netflix.spinnaker.cats.cache.DefaultCacheData;
-import com.netflix.spinnaker.cats.module.CatsModule;
 import com.netflix.spinnaker.clouddriver.Main;
-import com.netflix.spinnaker.clouddriver.aws.security.*;
-import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsConfig;
-import com.netflix.spinnaker.clouddriver.aws.security.config.CredentialsLoader;
-import com.netflix.spinnaker.clouddriver.security.AccountCredentialsRepository;
+import com.netflix.spinnaker.clouddriver.aws.security.AmazonClientProvider;
+import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
+import com.netflix.spinnaker.clouddriver.ecs.security.NetflixAssumeRoleEcsCredentials;
+import com.netflix.spinnaker.clouddriver.ecs.security.NetflixECSCredentials;
+import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
+import com.netflix.spinnaker.credentials.CompositeCredentialsRepository;
+import com.netflix.spinnaker.credentials.definition.CredentialsParser;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.function.BooleanSupplier;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.TestPropertySource;
 
 @SpringBootTest(
@@ -57,6 +66,45 @@ public class EcsSpec {
   protected final int TASK_RETRY_SECONDS = 3;
   protected static final String CREATE_SG_TEST_PATH = "/ecs/ops/createServerGroup";
 
+  @TestConfiguration
+  public static class Config {
+    @Value("${ecs.primaryAccount}")
+    final String ECS_ACCOUNT_NAME;
+
+    @Value("${aws.primaryAccount}")
+    final String AWS_ACCOUNT_NAME;
+
+    public Config(String ecs_account_name, String aws_account_name) {
+      ECS_ACCOUNT_NAME = ecs_account_name;
+      AWS_ACCOUNT_NAME = aws_account_name;
+    }
+
+    @Bean
+    @Primary
+    public CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository() {
+      NetflixAmazonCredentials awsCreds = TestCredential.named(AWS_ACCOUNT_NAME);
+      NetflixECSCredentials ecsCreds =
+          new NetflixAssumeRoleEcsCredentials(
+              TestCredential.assumeRoleNamed(ECS_ACCOUNT_NAME), AWS_ACCOUNT_NAME);
+      CompositeCredentialsRepository<AccountCredentials> repo =
+          mock(CompositeCredentialsRepository.class);
+      when(repo.getCredentials(any(), eq("aws"))).thenReturn(awsCreds);
+      when(repo.getCredentials(any(), eq("ecs"))).thenReturn(ecsCreds);
+      when(repo.getFirstCredentialsWithName(ECS_ACCOUNT_NAME)).thenReturn(ecsCreds);
+      when(repo.getFirstCredentialsWithName(AWS_ACCOUNT_NAME)).thenReturn(awsCreds);
+      return repo;
+    }
+
+    @Bean("amazonCredentialsParser")
+    @Primary
+    public CredentialsParser amazonCredentialsParser() {
+      NetflixAmazonCredentials awsCreds = TestCredential.assumeRoleNamed(ECS_ACCOUNT_NAME);
+      CredentialsParser parser = mock(CredentialsParser.class);
+      when(parser.parse(any())).thenReturn(awsCreds);
+      return parser;
+    }
+  }
+
   @Value("${ecs.enabled}")
   Boolean ecsEnabled;
 
@@ -65,23 +113,7 @@ public class EcsSpec {
 
   @LocalServerPort private int port;
 
-  @Autowired AccountCredentialsRepository accountCredentialsRepository;
-
   @MockBean protected AmazonClientProvider mockAwsProvider;
-
-  @MockBean AmazonAccountsSynchronizer mockAccountsSyncer;
-
-  @BeforeEach
-  public void setup() {
-    NetflixAmazonCredentials mockAwsCreds = mock(NetflixAmazonCredentials.class);
-    when(mockAccountsSyncer.synchronize(
-            any(CredentialsLoader.class),
-            any(CredentialsConfig.class),
-            any(AccountCredentialsRepository.class),
-            any(DefaultAccountConfigurationProperties.class),
-            any(CatsModule.class)))
-        .thenReturn(Collections.singletonList(mockAwsCreds));
-  }
 
   @DisplayName(".\n===\n" + "Assert AWS and ECS providers are enabled" + "\n===")
   @Test
@@ -123,39 +155,5 @@ public class EcsSpec {
       }
     }
     fail(failMsg);
-  }
-
-  protected void setEcsAccountCreds() {
-    AmazonCredentials.AWSRegion testRegion = new AmazonCredentials.AWSRegion(TEST_REGION, null);
-
-    NetflixAssumeRoleAmazonCredentials ecsCreds =
-        new NetflixAssumeRoleAmazonCredentials(
-            ECS_ACCOUNT_NAME,
-            "test",
-            "test",
-            "123456789012",
-            null,
-            true,
-            Collections.singletonList(testRegion),
-            null,
-            null,
-            null,
-            null,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
-            false,
-            "SpinnakerManaged",
-            "SpinnakerSession",
-            false,
-            "");
-
-    accountCredentialsRepository.save(ECS_ACCOUNT_NAME, ecsCreds);
   }
 }
