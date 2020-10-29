@@ -28,6 +28,7 @@ import com.netflix.spinnaker.credentials.CompositeCredentialsRepository;
 import com.netflix.spinnaker.credentials.definition.CredentialsParser;
 import lombok.AllArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 
 @AllArgsConstructor
@@ -36,8 +37,10 @@ public class EcsCredentialsParser<T extends NetflixECSCredentials>
 
   private final CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository;
   @Lazy private final EcsAccountMapper ecsAccountMapper;
+
+  @Qualifier("amazonCredentialsParser")
   private final CredentialsParser<CredentialsConfig.Account, NetflixAmazonCredentials>
-      AmazonCredentialsParser;
+      amazonCredentialsParser;
 
   @Override
   public NetflixECSCredentials parse(ECSCredentialsConfig.@NotNull Account accountDefinition) {
@@ -51,7 +54,7 @@ public class EcsCredentialsParser<T extends NetflixECSCredentials>
             netflixAmazonCredentials, accountDefinition.getName(), EcsProvider.NAME);
     NetflixECSCredentials netflixECSCredentials =
         new NetflixAssumeRoleEcsCredentials(
-            (NetflixAssumeRoleAmazonCredentials) AmazonCredentialsParser.parse(account),
+            (NetflixAssumeRoleAmazonCredentials) amazonCredentialsParser.parse(account),
             accountDefinition.getAwsAccount());
     ecsAccountMapper.addMapEntry(accountDefinition);
     return netflixECSCredentials;

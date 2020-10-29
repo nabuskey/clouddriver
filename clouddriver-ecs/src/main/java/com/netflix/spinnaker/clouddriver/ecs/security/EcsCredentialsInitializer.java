@@ -59,9 +59,6 @@ public class EcsCredentialsInitializer {
 
   @Bean
   @DependsOn("amazonCredentialsLoader")
-  @ConditionalOnMissingBean(
-      value = NetflixECSCredentials.class,
-      parameterizedContainer = CredentialsParser.class)
   CredentialsParser<ECSCredentialsConfig.Account, NetflixECSCredentials> ecsCredentialsParser(
       CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository,
       EcsAccountMapper ecsAccountMapper,
