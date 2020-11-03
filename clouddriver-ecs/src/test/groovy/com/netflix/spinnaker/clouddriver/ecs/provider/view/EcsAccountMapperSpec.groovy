@@ -34,10 +34,6 @@ class EcsAccountMapperSpec extends Specification {
     getName() >> ecsAccountName
     getAwsAccount() >> awsAccountName
   }
-  def ecsAccountConfig = new ECSCredentialsConfig.Account() {{
-    setAwsAccount(awsAccountName)
-    setName(ecsAccountName)
-  }}
   def credentialsRepository = Mock(CredentialsRepository) {
     getOne(ecsAccountName) >> ecsAccount
   }
@@ -48,7 +44,8 @@ class EcsAccountMapperSpec extends Specification {
   def 'should map an AWS account to its ECS account'() {
     given:
     def ecsAccountMapper = new EcsAccountMapper(credentialsRepository, compositeCredentialsRepository)
-    ecsAccountMapper.addMapEntry(ecsAccountConfig)
+
+    ecsAccountMapper.addMapEntry(ecsAccount)
 
     when:
     def retrievedEcsAccount = ecsAccountMapper.fromAwsAccountNameToEcs(awsAccount.name)
@@ -62,7 +59,7 @@ class EcsAccountMapperSpec extends Specification {
   def 'should map an AWS account name to its ECS account name'() {
     given:
     def ecsAccountMapper = new EcsAccountMapper(credentialsRepository, compositeCredentialsRepository)
-    ecsAccountMapper.addMapEntry(ecsAccountConfig)
+    ecsAccountMapper.addMapEntry(ecsAccount)
 
     when:
     def retrievedEcsAccount = ecsAccountMapper.fromAwsAccountNameToEcsAccountName(awsAccount.name)
@@ -76,7 +73,7 @@ class EcsAccountMapperSpec extends Specification {
   def 'should remove AWS and ECS accounts'() {
     given:
     def ecsAccountMapper = new EcsAccountMapper(credentialsRepository, compositeCredentialsRepository)
-    ecsAccountMapper.addMapEntry(ecsAccountConfig)
+    ecsAccountMapper.addMapEntry(ecsAccount)
 
     when:
     ecsAccountMapper.removeMapEntry(ecsAccountName)

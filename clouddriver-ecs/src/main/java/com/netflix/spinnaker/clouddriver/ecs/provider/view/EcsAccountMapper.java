@@ -18,14 +18,13 @@ package com.netflix.spinnaker.clouddriver.ecs.provider.view;
 
 import com.netflix.spinnaker.clouddriver.aws.AmazonCloudProvider;
 import com.netflix.spinnaker.clouddriver.aws.security.NetflixAmazonCredentials;
-import com.netflix.spinnaker.clouddriver.ecs.security.ECSCredentialsConfig;
+import com.netflix.spinnaker.clouddriver.ecs.security.NetflixAssumeRoleEcsCredentials;
 import com.netflix.spinnaker.clouddriver.ecs.security.NetflixECSCredentials;
 import com.netflix.spinnaker.clouddriver.security.AccountCredentials;
 import com.netflix.spinnaker.credentials.CompositeCredentialsRepository;
 import com.netflix.spinnaker.credentials.CredentialsRepository;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -50,9 +49,9 @@ public class EcsAccountMapper {
     awsCredentialsMap = new ConcurrentHashMap<>();
   }
 
-  public void addMapEntry(ECSCredentialsConfig.@NotNull Account account) {
-    ecsCredentialsMap.put(account.getAwsAccount(), account.getName());
-    awsCredentialsMap.put(account.getName(), account.getAwsAccount());
+  public void addMapEntry(NetflixAssumeRoleEcsCredentials credentials) {
+    ecsCredentialsMap.put(credentials.getAwsAccount(), credentials.getName());
+    awsCredentialsMap.put(credentials.getName(), credentials.getAwsAccount());
   }
 
   public void removeMapEntry(String ecsAccountName) {
