@@ -68,9 +68,7 @@ public class EcsCredentialsInitializer {
 
   @Bean
   @DependsOn("ecsCredentialsParser")
-  @ConditionalOnMissingBean(
-      value = NetflixECSCredentials.class,
-      parameterizedContainer = AbstractCredentialsLoader.class)
+  @ConditionalOnMissingBean(name = "ecsCredentialsLoader")
   AbstractCredentialsLoader<NetflixECSCredentials> ecsCredentialsLoader(
       CredentialsParser<ECSCredentialsConfig.Account, NetflixECSCredentials>
           amazonCredentialsParser,
@@ -84,9 +82,7 @@ public class EcsCredentialsInitializer {
   }
 
   @Bean
-  @ConditionalOnMissingBean(
-      value = NetflixECSCredentials.class,
-      parameterizedContainer = Poller.class)
+  @ConditionalOnMissingBean(name = "ecsCredentialsInializerSynchronizable")
   CredentialsInitializerSynchronizable ecsCredentialsInializerSynchronizable(
       AbstractCredentialsLoader<NetflixECSCredentials> ecsCredentialsLoader) {
     final Poller<NetflixECSCredentials> poller = new Poller<>(ecsCredentialsLoader);

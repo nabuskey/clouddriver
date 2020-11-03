@@ -75,13 +75,11 @@ class AmazonCredentialsInitializer {
   ) {
     new AmazonCredentialsParser<>(awsCredentialsProvider, amazonClientProvider, credentialsType, credentialsConfig)
   }
-  // Note that if there is a bean named "NetflixAmazonCredentials", all beans below will fail to create.
-  // This is because ConditionalOnMissingBean looks for a bean named "NetflixAmazonCredentials" as well as genericsClass<NetflixAmazonCredentials>
+
   @Bean
   @Primary
   @ConditionalOnMissingBean(
-    value = NetflixAmazonCredentials.class,
-    parameterizedContainer = CredentialsRepository.class
+    name = "amazonCredentialsRepository"
   )
   CredentialsRepository<NetflixAmazonCredentials> amazonCredentialsRepository(
     @Lazy CredentialsLifecycleHandler<NetflixAmazonCredentials> eventHandler
@@ -91,8 +89,7 @@ class AmazonCredentialsInitializer {
 
   @Bean
   @ConditionalOnMissingBean(
-    value = NetflixAmazonCredentials.class,
-    parameterizedContainer = AbstractCredentialsLoader.class
+    name = "amazonCredentialsLoader"
   )
   AbstractCredentialsLoader<? extends NetflixAmazonCredentials> amazonCredentialsLoader(
     CredentialsParser<Account, NetflixAmazonCredentials>  amazonCredentialsParser,
@@ -115,8 +112,7 @@ class AmazonCredentialsInitializer {
 
   @Bean
   @ConditionalOnMissingBean(
-    value = Account.class,
-    parameterizedContainer = CredentialsDefinitionSource.class
+    name = "amazonCredentialsInitializerSynchronizable"
   )
   CredentialsInitializerSynchronizable amazonCredentialsInitializerSynchronizable(
     AbstractCredentialsLoader<? extends NetflixAmazonCredentials> amazonCredentialsLoader
