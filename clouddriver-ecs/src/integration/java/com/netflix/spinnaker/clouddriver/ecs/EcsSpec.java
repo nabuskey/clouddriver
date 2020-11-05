@@ -61,24 +61,14 @@ public class EcsSpec {
   protected static final String TEST_OPERATIONS_LOCATION =
       "src/integration/resources/testoperations";
   protected static final String TEST_ARTIFACTS_LOCATION = "src/integration/resources/testartifacts";
-  protected final String ECS_ACCOUNT_NAME = "ecs-account";
+  protected static final String ECS_ACCOUNT_NAME = "ecs-account";
+  protected static final String AWS_ACCOUNT_NAME = "aws-account";
   protected final String TEST_REGION = "us-west-2";
   protected final int TASK_RETRY_SECONDS = 3;
   protected static final String CREATE_SG_TEST_PATH = "/ecs/ops/createServerGroup";
 
   @TestConfiguration
   public static class Config {
-    @Value("${ecs.primaryAccount}")
-    final String ECS_ACCOUNT_NAME;
-
-    @Value("${aws.primaryAccount}")
-    final String AWS_ACCOUNT_NAME;
-
-    public Config(String ecs_account_name, String aws_account_name) {
-      ECS_ACCOUNT_NAME = ecs_account_name;
-      AWS_ACCOUNT_NAME = aws_account_name;
-    }
-
     @Bean
     @Primary
     public CompositeCredentialsRepository<AccountCredentials> compositeCredentialsRepository() {
