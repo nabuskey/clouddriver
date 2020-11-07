@@ -15,6 +15,7 @@
 
 package com.netflix.spinnaker.clouddriver.ecs;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -73,6 +74,7 @@ public class EcsSpec {
   public void configTest() {
     assertTrue(awsEnabled);
     assertTrue(ecsEnabled);
+    assertEquals("ecs-account", ECS_ACCOUNT_NAME);
   }
 
   protected String generateStringFromTestFile(String path) throws IOException {
